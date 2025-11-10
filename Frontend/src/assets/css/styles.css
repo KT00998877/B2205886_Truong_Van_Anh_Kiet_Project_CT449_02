@@ -1,0 +1,158 @@
+/* ===========================================
+   VIEW-SPECIFIC STYLES - Separate for each page/component
+   =========================================== */
+
+/* Container chung cho views (nhanvien, docgia, sach) */
+.nhanvien-view,
+.docgia-container,
+.sach-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto 30px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* User Management View */
+.user-view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #4a2c0b; /* Nâu ấm theme */
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(160, 82, 45, 0.1);
+}
+
+.user-view h1 {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: #a0522d;
+}
+
+/* User-specific overlay & forms */
+.user-view .overlay {
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.user-view .add-form,
+.user-view .form-box {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+}
+
+.user-view .save-btn {
+  background: #a0522d;
+  color: white;
+}
+
+.user-view .save-btn:hover {
+  background: #cd853f;
+}
+
+.user-view .cancel-btn {
+  background: #ddd;
+  color: #666;
+}
+
+.user-view .cancel-btn:hover {
+  background: #ccc;
+}
+
+.user-view table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 30px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-view th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #a0522d;
+}
+
+.user-view tr:hover {
+  background: rgba(160, 82, 45, 0.05);
+}
+
+.user-view td button:first-child {
+  background: #a0522d;
+  color: white;
+}
+
+.user-view td button:first-child:hover {
+  background: #cd853f;
+}
+
+.user-view td button:last-child {
+  background: #dc3545;
+  color: white;
+}
+
+.user-view td button:last-child:hover {
+  background: #c82333;
+}
+
+/* Books/Sach View Specific */
+.sach-container .category-section {
+  margin-bottom: 40px;
+}
+
+.sach-container .category-section h3 {
+  margin-bottom: 10px;
+  color: #2563eb;
+  border-bottom: 2px solid #2563eb;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.image-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  transition: 0.2s;
+}
+
+.image-card img:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive for Views */
+@media (max-width: 768px) {
+  .nhanvien-view,
+  .docgia-container,
+  .sach-container {
+    padding: 15px;
+    margin: 15px;
+  }
+  .user-view {
+    padding: 20px 10px;
+  }
+  table,
+  .docgia-table {
+    font-size: 14px;
+  }
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}

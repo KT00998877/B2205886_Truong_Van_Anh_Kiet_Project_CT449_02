@@ -1,0 +1,353 @@
+.auth-page {
+  position: fixed; /* Force full viewport */
+  top: 0;
+  left: 0;
+  width: 100vw; /* Full width màn hình */
+  min-height: 100vh;
+  background-image: url('../img/background.jpg'); /* Path hình của bạn */
+  background-size: cover;
+  background-position: center center; /* Cân bằng center */
+  background-attachment: fixed; /* Chiều sâu */
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: -1; /* Background dưới cùng */
+}
+
+/* Overlay nhẹ toàn trang */
+.auth-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.1); /* Mờ nhẹ */
+  z-index: 1;
+}
+
+/* Wrapper nội dung để tránh fixed overflow */
+.auth-page > .content-wrapper {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  padding: 20px; /* Padding nhẹ cho mobile */
+}
+
+.login-container {
+  max-width: 420px;
+  margin: 0 auto; /* Center form */
+  padding: 40px 30px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(160, 82, 45, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(210, 180, 140, 0.3);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Hiệu ứng fade-in: Form hiện dần khi load */
+  animation: fadeInUp 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+  text-align: center; /* Center logo và text */
+}
+
+.login-container h2 {
+  margin-bottom: 20px; /* Giảm margin dưới h2 để logo gần hơn */
+  color: #4a2c0b;
+  font-size: 28px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Style cho logo mới thêm */
+.login-container img {
+  display: block; /* Block để center dễ */
+  max-width: 120px; /* Kích thước vừa phải, không lấn form */
+  height: auto; /* Giữ tỷ lệ */
+  margin: 0 auto 30px; /* Center + space dưới */
+  border-radius: 12px; /* Bo góc nhẹ, như bìa sách */
+  box-shadow: 0 4px 12px rgba(160, 82, 45, 0.15); /* Shadow nâu ấm */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng hover mượt */
+  animation: fadeInUp 0.8s ease-out 0.2s forwards; /* Delay nhẹ để logo hiện sau h2 */
+  opacity: 0;
+  transform: translateY(20px); /* Bắt đầu từ dưới một chút */
+}
+
+.login-container img:hover {
+  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+  box-shadow: 0 6px 16px rgba(160, 82, 45, 0.25); /* Shadow mạnh hơn */
+}
+
+/* Form layout */
+.login-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left; /* Giữ input left-align */
+}
+
+.login-container input {
+  padding: 14px 16px;
+  font-size: 16px;
+  border: 1px solid #d4af37;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.login-container input:focus {
+  outline: none;
+  border-color: #a0522d;
+  box-shadow: 0 0 0 3px rgba(160, 82, 45, 0.15);
+  transform: scale(1.02);
+}
+
+.login-container input::placeholder {
+  color: #8b7355;
+}
+
+/* Nút đăng nhập */
+.login-container button {
+  margin-top: 10px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #a0522d 0%, #cd853f 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  will-change: transform;
+}
+
+.login-container button:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 5px 15px rgba(160, 82, 45, 0.3);
+  animation: pulse 1.5s infinite;
+}
+
+.login-container button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Liên kết đăng ký */
+.login-container p {
+  margin-top: 24px;
+  color: #6b4423;
+  font-size: 14px;
+}
+
+.login-container p a {
+  color: #a0522d;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.login-container p a:hover {
+  text-decoration: underline;
+  color: #cd853f;
+}
+
+/* Keyframes cho hiệu ứng */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 5px 15px rgba(160, 82, 45, 0.3); }
+  50% { box-shadow: 0 5px 20px rgba(160, 82, 45, 0.4); }
+  100% { box-shadow: 0 5px 15px rgba(160, 82, 45, 0.3); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-page {
+    background-attachment: scroll;
+    background-position: center top; 
+  }
+  .login-container {
+    padding: 30px 20px;
+    max-width: 100%;
+    animation-duration: 0.6s;
+  }
+  .login-container img {
+    max-width: 100px; /* Nhỏ hơn trên mobile */
+    margin-bottom: 20px;
+  }
+}
+/* Style cho logo mới thêm */
+.login-container img {
+  display: block; /* Block để center dễ */
+  width: 120px; /* Fix width thay vì max-width, để border-radius work tốt */
+  height: 120px; /* Fix height vuông cho hình tròn */
+  margin: 0 auto 30px; /* Center + space dưới */
+  border-radius: 50%; /* Thêm: Làm hình tròn */
+  object-fit: cover; /* Thêm: Crop vừa khung tròn nếu hình không vuông */
+  box-shadow: 0 4px 12px rgba(160, 82, 45, 0.15); /* Shadow nâu ấm */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng hover mượt */
+  animation: fadeInUp 0.8s ease-out 0.2s forwards; /* Delay nhẹ để logo hiện sau h2 */
+  opacity: 0;
+  transform: translateY(20px); /* Bắt đầu từ dưới một chút */
+}
+
+.login-container img:hover {
+  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+  box-shadow: 0 6px 16px rgba(160, 82, 45, 0.25); /* Shadow mạnh hơn */
+}
+
+/* Resgister */
+
+.register-container {
+  max-width: 480px;
+  margin: 0 auto; /* Giữ center form */
+  padding: 40px 20px; 
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(160, 82, 45, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(210, 180, 140, 0.3);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  animation: fadeInUp 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.register-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #4a2c0b;
+  font-size: 28px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Form layout */
+.register-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.register-container input {
+  padding: 14px 16px;
+  font-size: 16px;
+  border: 1px solid #d4af37;
+  border-radius: 8px;
+  transition: all 0.3s ease; /* Mở rộng transition cho hiệu ứng */
+  background: rgba(255, 255, 255, 0.95);
+  /* Hiệu ứng focus: Scale nhẹ + glow */
+}
+
+.register-container input:focus {
+  outline: none;
+  border-color: #a0522d;
+  box-shadow: 0 0 0 3px rgba(160, 82, 45, 0.15);
+  transform: scale(1.02); /* Scale nhẹ khi focus */
+}
+
+.register-container input::placeholder {
+  color: #8b7355;
+}
+
+/* Nút đăng ký */
+.register-container button {
+  margin-top: 10px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #a0522d 0%, #cd853f 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  will-change: transform;
+  /* Hiệu ứng pulse khi hover: Nhịp nhàng như tim đập sách */
+}
+
+.register-container button:hover {
+  transform: translateY(-2px) scale(1.05); /* Kết hợp scale */
+  box-shadow: 0 5px 15px rgba(160, 82, 45, 0.3);
+  animation: pulse 1.5s infinite; /* Pulse nhẹ */
+}
+
+.register-container button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Liên kết đăng nhập */
+.register-container p {
+  text-align: center;
+  margin-top: 24px;
+  color: #6b4423;
+  font-size: 14px;
+}
+
+.register-container p a {
+  color: #a0522d;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease; /* Hiệu ứng mượt cho link */
+}
+
+.register-container p a:hover {
+  text-decoration: underline;
+  color: #cd853f;
+}
+
+/* Keyframes cho hiệu ứng */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 5px 15px rgba(160, 82, 45, 0.3); }
+  50% { box-shadow: 0 5px 20px rgba(160, 82, 45, 0.4); }
+  100% { box-shadow: 0 5px 15px rgba(160, 82, 45, 0.3); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-page {
+    background-attachment: scroll;
+    background-position: center top; 
+  }
+  .register-container {
+    margin: 0;
+    padding: 30px 20px;
+    max-width: 100%;
+    animation-duration: 0.6s; /* Nhanh hơn trên mobile */
+  }
+}
+
+/* Style cho logo mới thêm */
+.register-container img {
+  display: block; /* Block để center dễ */
+  width: 120px; /* Fix width thay vì max-width, để border-radius work tốt */
+  height: 120px; /* Fix height vuông cho hình tròn */
+  margin: 0 auto 30px; /* Center + space dưới */
+  border-radius: 50%; /* Thêm: Làm hình tròn */
+  object-fit: cover; /* Thêm: Crop vừa khung tròn nếu hình không vuông */
+  box-shadow: 0 4px 12px rgba(160, 82, 45, 0.15); /* Shadow nâu ấm */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng hover mượt */
+  animation: fadeInUp 0.8s ease-out 0.2s forwards; /* Delay nhẹ để logo hiện sau h2 */
+  opacity: 0;
+  transform: translateY(20px); /* Bắt đầu từ dưới một chút */
+}
+
+.register-container img:hover {
+  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+  box-shadow: 0 6px 16px rgba(160, 82, 45, 0.25); /* Shadow mạnh hơn */
+}
