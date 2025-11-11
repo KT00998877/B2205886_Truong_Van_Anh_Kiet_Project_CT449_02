@@ -7,7 +7,7 @@
             <select v-model="selectedTheLoai" @change="applyFilters">
                 <option value="">Tất cả thể loại</option>
                 <option v-for="theloai in theloais" :key="theloai" :value="theloai">
-                    {{(theloai) }}
+                    {{ (theloai) }}
                 </option>
             </select>
 
@@ -40,12 +40,32 @@
 
                 <!-- Nút thao tác -->
                 <div class="book-actions">
-                    <button class="btn update" @click="$router.push(`/sach/edit/${s._id}`)">✏️ Cập nhật</button>
-                    <button class="btn delete" @click.stop="deleteSach(s._id)">🗑 Xoá</button>
+                    <button class="btn-borrow" @click.stop="openBorrowForm(s)">
+                        📥 Mượn sách
+                    </button>
                 </div>
             </div>
         </div>
+        <div v-if="selectedBook" class="borrow-popup">
+            <div class="borrow-form">
+                <h3>📘 Mượn: {{ selectedBook.TenSach }}</h3>
+
+                <label>Ngày mượn</label>
+                <input type="date" v-model="borrowForm.NgayMuon" />
+
+                <label>Hạn trả</label>
+                <input type="date" v-model="borrowForm.HanTra" />
+
+                <div class="form-buttons">
+                    <button @click="submitBorrow" class="btn-confirm">✅ Xác nhận</button>
+                    <button @click="closeBorrowForm" class="btn-cancel">❌ Hủy</button>
+                </div>
+
+                <p v-if="message" class="status-msg">{{ message }}</p>
+            </div>
+        </div>
     </div>
+
 </template>
 
 
@@ -64,6 +84,15 @@ export default {
             searchQuery: "",
             sortBy: "",
             defaultImage: "https://via.placeholder.com/200x280?text=No+Image",
+            selectedBook: null, 
+            borrowForm: {
+                MaDocGia: "",
+                MaSach: "",
+                MSNV: "",
+                NgayMuon: "", 
+                HanTra: "",
+            },
+            message: "",
         };
     },
 
@@ -149,26 +178,51 @@ export default {
             this.$router.push(`/sach/${s._id}`);
         },
 
-        // ✏️ Cập nhật
-        updateSach(s) {
-            this.$router.push(`/sach/edit/${s._id}`);
+        openBorrowForm(s) {
+            this.selectedBook = s;
+            const today = new Date().toISOString().split('T')[0];
+            this.borrowForm = {
+                MaSach: s._id, 
+                MSNV: "",
+                NgayMuon: today, 
+                HanTra: "",
+            };
+
+            this.message = "";
         },
 
-        // 🗑 Xoá
-        async deleteSach(id) {
-            if (!confirm("Bạn có chắc muốn xoá sách này không?")) return;
+        closeBorrowForm() {
+            this.selectedBook = null;
+            this.borrowForm = {
+                MaDocGia: "",
+                MaSach: "",
+                MSNV: "",
+                NgayMuon: "", 
+                HanTra: ""
+            };
+        },
+
+        async submitBorrow() {
             try {
-                await api.delete(`/sach/${id}`);
-                this.sachs = this.sachs.filter((item) => item._id !== id);
-                this.applyFilters();
-                alert("Đã xoá thành công ✅");
+                const token = localStorage.getItem("token");
+                const res = await api.post(
+                    "/theodoimuonsach/muon",
+                    this.borrowForm,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                this.message = res.data.message || "Mượn sách thành công!";
+                setTimeout(() => {
+                    this.closeBorrowForm();
+                }, 1500);
             } catch (err) {
-                console.error("❌ Lỗi khi xoá:", err);
-                alert("Không thể xoá sách này!");
+                console.error("❌ Lỗi khi mượn sách:", err);
+                this.message =
+                    err.response?.data?.message || "Không thể mượn sách. Vui lòng thử lại.";
             }
         },
-    },
 
+    },
 };
 </script>
 
@@ -304,5 +358,105 @@ h2 {
 
 .btn.delete:hover {
     background-color: #c62828;
+}
+
+.borrow-popup {
+    /* 1. Lớp phủ toàn màn hình */
+    position: fixed;
+    /* Đứng yên so với viewport */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    /* 100% chiều rộng màn hình */
+    height: 100vh;
+    /* 100% chiều cao màn hình */
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Lớp nền mờ */
+
+    /* 2. Căn giữa nội dung (cái form) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* 3. Đảm bảo nó nổi lên trên cùng */
+    z-index: 9999;
+}
+
+.borrow-form {
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px;
+    /* Giới hạn chiều rộng của form */
+
+    /* CSS cho các phần tử bên trong form */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    /* Khoảng cách giữa các phần tử */
+}
+
+.borrow-form h3 {
+    margin-top: 0;
+    text-align: center;
+}
+
+.borrow-form label {
+    font-weight: bold;
+    margin-bottom: -5px;
+    /* Gần input hơn */
+}
+
+.borrow-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    /* Căn nút sang phải */
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-confirm,
+.btn-cancel {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-confirm {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-cancel {
+    background-color: #dc3545;
+    color: white;
+}
+
+.status-msg {
+    text-align: center;
+    font-weight: bold;
+    color: #28a745;
+    /* Màu xanh lá */
+}
+
+.status-msg:not(:empty) {
+    margin-top: 10px;
+}
+
+/* Kế thừa style từ template cho các nút trong card (nếu cần) */
+.btn-borrow {
+    cursor: pointer;
+    /* (Thêm các style khác nếu bạn chưa có) */
 }
 </style>

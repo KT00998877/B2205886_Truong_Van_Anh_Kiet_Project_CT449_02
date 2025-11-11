@@ -38,7 +38,7 @@ app.use("/api/docgia", docgiaRoutes);
 app.use("/api/nhanvien", nhanvienRoutes);
 app.use("/api/nhaxuatban", NhaxuatbanRoutes);
 app.use("/api/sach", sachRoutes);
-app.use("/api/muon-sach", muonSachRoutes);
+app.use("/api/theodoimuonsach", muonSachRoutes);
 app.use("/api/users", userRoutes);
 
 // Server

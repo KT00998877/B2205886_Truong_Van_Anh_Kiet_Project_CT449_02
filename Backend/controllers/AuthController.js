@@ -1,6 +1,8 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.model.js";
+import DocGia from "../models/Docgia.model.js";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -8,22 +10,59 @@ const AuthController = {
   // 🧍 Đăng ký người dùng
   registerUser: async (req, res) => {
     try {
-      const { username, password, email } = req.body;
+      const {
+        username,
+        password,
+        email,
+        HoLot,
+        Ten,
+        Phai,
+        NgaySinh,
+        DiaChi,
+        SoDienThoai,
+      } = req.body;
+
+      // Kiểm tra trùng username
       const existingUser = await User.findOne({ username });
       if (existingUser)
         return res.status(400).json({ message: "Tên đăng nhập đã tồn tại" });
 
+      // Mã hoá mật khẩu
       const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Tạo tài khoản User
       const newUser = new User({
         username,
         email,
         password: hashedPassword,
         role: "user",
       });
-      await newUser.save();
+      const savedUser = await newUser.save();
 
-      res.status(201).json({ message: "Đăng ký thành công" });
+      // Tạo mã độc giả tự động (ví dụ: DG + timestamp)
+      const maDocGia = "DG" + Date.now();
+
+      // Tạo bản ghi DocGia liên kết với User
+      const newDocGia = new DocGia({
+        MaDocGia: maDocGia,
+        HoLot,
+        Ten,
+        Phai,
+        NgaySinh,
+        DiaChi,
+        SoDienThoai,
+        userId: savedUser._id,
+      });
+
+      await newDocGia.save();
+
+      res.status(201).json({
+        message: "Đăng ký thành công",
+        user: savedUser,
+        docGia: newDocGia,
+      });
     } catch (error) {
+      console.error("❌ Lỗi đăng ký:", error);
       res.status(500).json({ message: "Lỗi server", error: error.message });
     }
   },
@@ -33,7 +72,8 @@ const AuthController = {
     try {
       const { username, password } = req.body;
       const user = await User.findOne({ username, role: "user" });
-      if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng!" });
+      if (!user)
+        return res.status(404).json({ message: "Không tìm thấy người dùng!" });
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(401).json({ message: "Sai mật khẩu!" });
@@ -55,7 +95,8 @@ const AuthController = {
     try {
       const { username, password } = req.body;
       const admin = await User.findOne({ username, role: "admin" });
-      if (!admin) return res.status(404).json({ message: "Không tìm thấy quản lý!" });
+      if (!admin)
+        return res.status(404).json({ message: "Không tìm thấy quản lý!" });
 
       const isMatch = await bcrypt.compare(password, admin.password);
       if (!isMatch) return res.status(401).json({ message: "Sai mật khẩu!" });

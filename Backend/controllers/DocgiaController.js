@@ -1,5 +1,20 @@
 import DocGia from "../models/Docgia.model.js";
 
+export const getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // Lấy từ token đã decode trong verifyToken
+    const docGia = await DocGia.findOne({ userId }).populate(
+      "userId",
+      "username email"
+    );
+    if (!docGia)
+      return res.status(404).json({ message: "Không tìm thấy độc giả!" });
+    res.json(docGia);
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
 // 📘 Lấy tất cả độc giả
 export const getAllDocGia = async (req, res) => {
   try {

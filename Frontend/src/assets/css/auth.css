@@ -212,6 +212,8 @@
   padding: 40px 20px; 
   background: rgba(255, 255, 255, 0.92);
   border-radius: 16px;
+  max-height: 90vh; 
+  overflow-y: auto;
   box-shadow: 0 15px 40px rgba(160, 82, 45, 0.2);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(210, 180, 140, 0.3);
@@ -228,6 +230,17 @@
   font-size: 28px;
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.register-container::-webkit-scrollbar {
+  width: 8px;
+}
+.register-container::-webkit-scrollbar-thumb {
+  background-color: #007bff;
+  border-radius: 4px;
+}
+.register-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
 /* Form layout */

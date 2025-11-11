@@ -1,10 +1,14 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 import AdminLayout from "../components/AdminLayout.vue";
+import UserLayout from "../components/UserLayout.vue";
 
 // --- USER VIEWS ---
 import UserLogin from "../views/user/Userlogin.vue";
 import UserRegister from "../views/user/UserRegister.vue";
+import SachUser from "../views/user/Sach.vue";
+import Profile from "../views/user/Profile.vue";
+import MuonSach from "../views/user/Chitietmuonsach.vue";
 
 // --- ADMIN VIEWS ---
 import AdminLogin from "../views/admin/Adminlogin.vue";
@@ -14,6 +18,7 @@ import SachDetail from "../views/admin/SachDetail.vue";
 import SachEdit from "../views/admin/SachEdit.vue";
 import NhanVien from "../views/admin/NhanVien.vue";
 import User from "../views/admin/User.vue";
+import MuonSachAdmin from "../views/admin/MuonSachAdmin.vue";
 
 // --- ERROR VIEW ---
 import NotFound from "../views/errors/NotFound.vue";
@@ -56,9 +61,19 @@ const routes = [
       { path: "sach/edit/:id", name: "SachEdit", component: SachEdit },
       { path: "nhanvien", name: "NhanVien", component: NhanVien },
       { path: "users", name: "User", component: User },
+      { path: "muonsach", name: "MuonSachAdmin", component: MuonSachAdmin },
     ],
   },
-
+  {
+    path: "/user",
+    component: UserLayout,
+    meta: { requiresUser: true },
+    children: [
+      { path: "sach", name: "SachUser", component: SachUser },
+      { path: "profile", name: "Profile", component: Profile },
+      { path: "muonsach", name: "MuonSach", component: MuonSach },
+    ],
+  },
   
   // Mặc định vào trang login của user
   { path: "/", redirect: "/user/login" },

@@ -6,6 +6,7 @@ import "./assets/css/nucleo-svg.css";
 import "./assets/css/styles.css";
 import "./assets/css/global.css";
 import "./assets/css/auth.css";
+import "./assets/css/bootstrap.min.css";
 
 const app = createApp(App);
 

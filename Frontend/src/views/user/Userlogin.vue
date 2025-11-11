@@ -31,7 +31,7 @@ const handleLogin = async () => {
         const res = await loginUser({ username: username.value, email: email.value, password: password.value });
         localStorage.setItem("userToken", res.data.token);
         alert("Đăng nhập thành công!");
-        router.push("/user/home");
+        router.push("/user/sach");
     } catch (err) {
         alert(err.response?.data?.message || "Đăng nhập thất bại!");
     }

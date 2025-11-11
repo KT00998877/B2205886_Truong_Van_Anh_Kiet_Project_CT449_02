@@ -1,19 +1,26 @@
 import express from "express";
 import {
-  getAllPhieuMuon,
-  getPhieuMuonById,
-  createPhieuMuon,
-  updatePhieuMuon,
-  deletePhieuMuon,
+  muonSach,
+  traSach,
+  getAllMuonSach,
+  getMuonByDocGia,
+  duyetMuonSach,
+  createMuonSach,
+  updateMuonSach,
+  deleteMuonSach,
 } from "../controllers/TheodoimuonsachController.js";
+import AuthController from "../controllers/AuthController.js";
 
 const router = express.Router();
 
-// Định nghĩa các route
-router.get("/", getAllPhieuMuon); // Lấy danh sách phiếu
-router.get("/:id", getPhieuMuonById); // Lấy 1 phiếu theo ID
-router.post("/", createPhieuMuon); // Thêm phiếu mượn
-router.put("/:id", updatePhieuMuon); // Cập nhật phiếu
-router.delete("/:id", deletePhieuMuon); // Xoá phiếu
+router.post("/muon", AuthController.verifyToken, muonSach);
+router.put("/tra/:id", AuthController.verifyToken, traSach);
+router.get("/", AuthController.verifyToken, getAllMuonSach);
+router.put("/duyet/:id", AuthController.verifyToken, duyetMuonSach);
+router.get("/docgia/:MaDocGia", AuthController.verifyToken, getMuonByDocGia);
+router.get("/", getAllMuonSach);
+router.post("/", createMuonSach);
+router.put("/:id", updateMuonSach);
+router.delete("/:id", deleteMuonSach);
 
-export default router; 
+export default router;
