@@ -1,6 +1,8 @@
 import TheoDoiMuonSach from "../models/Theodoimuonsach.model.js";
 import DocGia from "../models/Docgia.model.js";
 import Sach from "../models/Sach.model.js";
+import Notification from "../models/Notification.model.js";
+import { io } from "../server.js";
 
 // 🟢 Người dùng gửi yêu cầu mượn
 export const muonSach = async (req, res) => {
@@ -14,6 +16,18 @@ export const muonSach = async (req, res) => {
     if (!MaSach || !NgayMuon || !HanTra)
       return res.status(400).json({ message: "Thiếu thông tin mượn sách!" });
 
+    const daMuon = await TheoDoiMuonSach.findOne({
+      MaDocGia: docGia.MaDocGia,
+      MaSach: MaSach,
+      TrangThai: { $ne: "Đã trả" } 
+    });
+
+    if (daMuon) {
+      return res.status(400).json({
+        message: "Bạn đang mượn cuốn sách này rồi, hãy trả trước khi mượn lại!"
+      });
+    }
+
     const newRecord = new TheoDoiMuonSach({
       MaDocGia: docGia.MaDocGia,
       MaSach,
@@ -23,30 +37,125 @@ export const muonSach = async (req, res) => {
     });
 
     await newRecord.save();
+
+    const notify = await Notification.create({
+      userId: null, // admin xem tất cả
+      type: "yeu_cau_muon_moi",
+      title: "Có yêu cầu mượn sách mới",
+      message: `${docGia.HoLot} ${docGia.Ten} yêu cầu mượn sách.`,
+      data: {
+        muonSachId: newRecord._id,
+        MaSach,
+        MaDocGia: docGia.MaDocGia,
+      },
+    });
+
+    io.emit("notification", notify);
+
     res.status(201).json({
       message: "Yêu cầu mượn sách đã được gửi, vui lòng chờ duyệt.",
       record: newRecord,
     });
+
   } catch (error) {
     console.error("❌ Lỗi gửi yêu cầu mượn:", error);
     res.status(500).json({ message: "Lỗi server", error: error.message });
   }
 };
 
+// 🔥 Đánh dấu mất sách
+export const matSach = async (req, res) => {
+  try {
+    const record = await TheoDoiMuonSach.findById(req.params.id);
+    if (!record)
+      return res.status(404).json({ message: "Không tìm thấy phiếu mượn!" });
+
+    // Chỉ mất khi đang mượn hoặc quá hạn
+    if (
+      record.TrangThai !== "Đã duyệt - Đang mượn" &&
+      record.TrangThai !== "Quá hạn"
+    ) {
+      return res.status(400).json({
+        message:
+          "Chỉ có thể đánh dấu mất sách khi sách đang mượn hoặc quá hạn!",
+      });
+    }
+    // 🔥 Lấy DocGia từ MaDocGia
+    const docGia = await DocGia.findOne({ MaDocGia: record.MaDocGia });
+
+    if (!docGia)
+      return res.status(404).json({ message: "Không tìm thấy độc giả!" });
+
+    // Lưu lý do mất nếu truyền lên
+    const { Lydo } = req.body;
+    if (Lydo) record.Lydo = Lydo;
+
+    record.TrangThai = "Mất sách";
+    await record.save();
+
+    await Sach.findByIdAndUpdate(record.MaSach, { $inc: { SoQuyen: -1 } });
+
+    // 🔔 Thông báo cho độc giả
+    const notify = await Notification.create({
+      userId: docGia.userId,
+      type: "mat_sach",
+      title: "⚠️ Mất sách",
+      message: `Bạn đã bị đánh dấu mất sách: ${record.MaSach.TenSach}`,
+    });
+
+    io.emit("notification", notify);
+
+    res.json({
+      message: "⚠️ Đã đánh dấu mất sách!",
+      record,
+    });
+  } catch (err) {
+    console.error("❌ Lỗi khi đánh dấu mất sách:", err);
+    res.status(500).json({
+      message: "Lỗi khi đánh dấu mất sách",
+      error: err.message
+    });
+  }
+};
+
+
 // 🟡 Quản lý duyệt mượn
 export const duyetMuonSach = async (req, res) => {
   try {
-    const record = await TheoDoiMuonSach.findById(req.params.id);
+    const record = await TheoDoiMuonSach.findById(req.params.id).populate(
+      "MaSach"
+    ); 
     if (!record)
       return res.status(404).json({ message: "Không tìm thấy phiếu mượn" });
 
     if (record.TrangThai !== "Chờ duyệt")
       return res.status(400).json({ message: "Phiếu này đã được xử lý rồi!" });
 
-    record.TrangThai = "Đã duyệt - Đã mượn";
+    // 🔥 Lấy DocGia từ MaDocGia
+    const docGia = await DocGia.findOne({ MaDocGia: record.MaDocGia });
+
+    if (!docGia)
+      return res.status(404).json({ message: "Không tìm thấy độc giả!" });
+
+    record.TrangThai = "Đã duyệt - Đang mượn";
     await record.save();
 
     await Sach.findByIdAndUpdate(record.MaSach, { $inc: { SoQuyen: -1 } });
+
+    const notify = await Notification.create({
+      userId: docGia.userId,
+      type: "duyet_muon",
+      title: "Yêu cầu mượn sách đã được duyệt",
+      message: `Bạn đã được duyệt mượn sách: ${record.MaSach.TenSach}`,
+      data: {
+        muonSachId: record._id,
+        MaSach: record.MaSach._id,
+        tenSach: record.MaSach.TenSach,
+      },
+    });
+
+    io.emit("notification", notify);
+
     res.json({ message: "✅ Đã duyệt phiếu mượn thành công" });
   } catch (err) {
     res.status(500).json({ message: "Lỗi duyệt phiếu", error: err.message });
@@ -65,16 +174,39 @@ export const huyMuonSach = async (req, res) => {
         .status(400)
         .json({ message: "Chỉ có thể từ chối phiếu đang chờ duyệt!" });
 
+    const { Lydo } = req.body;
+    if (!Lydo)
+      return res.status(400).json({ message: "Vui lòng nhập lý do từ chối!" });
+
+    // 🔥 Lấy DocGia từ MaDocGia
+    const docGia = await DocGia.findOne({ MaDocGia: record.MaDocGia });
+
+    if (!docGia)
+      return res.status(404).json({ message: "Không tìm thấy độc giả!" });
+
     record.TrangThai = "Từ chối";
+    record.Lydo = Lydo;
     await record.save();
 
-    res.json({ message: "❌ Đã từ chối yêu cầu mượn sách!" });
+    // 🔔 Gửi thông báo cho độc giả
+    const notify = await Notification.create({
+      userId: docGia.userId,
+      type: "tu_choi_muon",
+      title: "Yêu cầu mượn sách bị từ chối",
+      message: `Sách "${record.MaSach.TenSach}" đã bị từ chối. Lý do: ${Lydo}`,
+      data: { muonSachId: record._id },
+    });
+
+    io.emit("notification", notify);
+
+    res.json({ message: "❌ Đã từ chối yêu cầu mượn sách!", data: record });
   } catch (err) {
     res
       .status(500)
       .json({ message: "Lỗi khi hủy phiếu mượn", error: err.message });
   }
 };
+
 
 // 🔵 Trả sách
 export const traSach = async (req, res) => {
@@ -85,15 +217,34 @@ export const traSach = async (req, res) => {
         .status(404)
         .json({ message: "Không tìm thấy bản ghi mượn sách!" });
 
-    if (record.TrangThai !== "Đang mượn")
+    if (record.TrangThai !== "Đã duyệt - Đang mượn")
       return res
         .status(400)
         .json({ message: "Chỉ có thể trả sách khi đang mượn!" });
+    // 🔥 Lấy DocGia từ MaDocGia
+    const docGia = await DocGia.findOne({ MaDocGia: record.MaDocGia });
+
+    if (!docGia)
+      return res.status(404).json({ message: "Không tìm thấy độc giả!" });
 
     record.TrangThai = "Đã trả";
     await record.save();
 
-    await Sach.findByIdAndUpdate(record.MaSach, { $inc: { SoQuyen: 1 } });
+    await Sach.findByIdAndUpdate(record.MaSach._id || record.MaSach, {
+      $inc: { SoQuyen: 1 },
+    });
+
+    // 🔔 Gửi thông báo cho độc giả
+    const notify = await Notification.create({
+      userId: docGia.userId,
+      type: "tra_sach",
+      title: "Trả sách thành công",
+      message: `Bạn đã trả: ${record.MaSach.TenSach}`,
+      data: { muonSachId: record._id },
+    });
+
+    io.emit("notification", notify);
+
     res.json({ message: "📗 Trả sách thành công!", record });
   } catch (err) {
     console.error("❌ Lỗi khi trả sách:", err);
@@ -105,7 +256,7 @@ export const traSach = async (req, res) => {
 export const getAllMuonSach = async (req, res) => {
   try {
     const muons = await TheoDoiMuonSach.find()
-      .populate("MaSach", "TenSach TacGia TheLoai SoQuyen")
+      .populate("MaSach", "TenSach TacGia TheLoai SoQuyen HinhAnh")
       .populate("MaDocGia", "HoLot Ten MaDocGia");
     res.json(muons);
   } catch (err) {
@@ -122,7 +273,7 @@ export const getMuonByDocGia = async (req, res) => {
     const { MaDocGia } = req.params;
     const muons = await TheoDoiMuonSach.find({ MaDocGia }).populate(
       "MaSach",
-      "TenSach TacGia TheLoai DonGia SoQuyen"
+      "TenSach TacGia TheLoai DonGia SoQuyen HinhAnh"
     );
     res.json(muons);
   } catch (err) {
@@ -192,3 +343,27 @@ export const deleteMuonSach = async (req, res) => {
       .json({ message: "Lỗi khi xóa phiếu mượn", error: err.message });
   }
 };
+
+export const capNhatQuaHan = async (req, res) => {
+  try {
+    const today = new Date();
+
+    const result = await TheoDoiMuonSach.updateMany(
+      {
+        TrangThai: { $ne: "Đã trả" },
+        HanTra: { $lt: today },
+      },
+      { $set: { TrangThai: "Quá hạn" } }
+    );
+
+    res.json({ message: "Đã cập nhật quá hạn", updated: result.modifiedCount });
+  } catch (err) {
+    res.status(500).json({
+      message: "Lỗi khi cập nhật trạng thái quá hạn",
+      error: err.message,
+    });
+  }
+};
+
+
+

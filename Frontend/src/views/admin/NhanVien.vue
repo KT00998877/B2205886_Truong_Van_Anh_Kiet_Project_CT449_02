@@ -1,5 +1,5 @@
 <template>
-  <div class="nhanvien-view">
+  <div class="container">
     <h1>Quản lí Nhân Viên</h1>
     <button class="open-form-btn" @click="showAddForm = true">
       ➕ Thêm Nhân Viên

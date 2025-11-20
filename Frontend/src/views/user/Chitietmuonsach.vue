@@ -1,31 +1,48 @@
 <template>
-    <div class="borrow-page">
-        <h2>📚 Lịch sử mượn sách của bạn</h2>
+    <div class="container-fluid">
+        <h2> Lịch sử mượn sách của bạn</h2>
 
-        <div v-if="loading" class="loading">⏳ Đang tải dữ liệu...</div>
+        <div v-if="loading" class="loading"> Đang tải dữ liệu...</div>
         <div v-else-if="error" class="error">{{ error }}</div>
 
         <div v-else>
             <div v-if="records.length === 0" class="empty">Bạn chưa mượn quyển sách nào.</div>
 
             <div class="borrow-list">
-                <div v-for="item in records" :key="item._id" class="borrow-card">
-                    <div class="book-info">
-                        <h3>{{ item.MaSach?.TenSach || "Không rõ tên sách" }}</h3>
-                        <p><strong>Tác giả:</strong> {{ item.MaSach?.TacGia || "N/A" }}</p>
-                        <p><strong>Thể loại:</strong> {{ item.MaSach?.TheLoai || "N/A" }}</p>
+                <div v-for="(item, index) in records" :key="item?._id || index" class="borrow-card">
+
+                    <!-- BOX STT + HÌNH -->
+                    <div class="book-left">
+                        <div class="stt">{{ index + 1 }}</div>
+
+                        <img class="book-img" :src="getBookImageCart(item.MaSach)" alt="ảnh sách" />
                     </div>
 
+                    <!-- THÔNG TIN SÁCH -->
+                    <div class="book-info">
+                        <h3>{{ item?.MaSach?.TenSach || "Không rõ tên sách" }}</h3>
+                        <p><strong>Tác giả:</strong> {{ item?.MaSach?.TacGia || "N/A" }}</p>
+                        <p><strong>Thể loại:</strong> {{ item?.MaSach?.TheLoai || "N/A" }}</p>
+                    </div>
+
+                    <!-- CHI TIẾT MƯỢN — ĐÃ SỬA -->
                     <div class="borrow-details">
-                        <p><strong>Ngày mượn:</strong> {{ formatDate(item.NgayMuon) }}</p>
-                        <p><strong>Hạn trả:</strong> {{ formatDate(item.HanTra) }}</p>
+                        <p><strong>Ngày mượn:</strong> {{ formatDate(item?.NgayMuon) }}</p>
+                        <p><strong>Hạn trả:</strong> {{ formatDate(item?.HanTra) }}</p>
+
                         <p>
                             <strong>Trạng thái:</strong>
-                            <span :class="['status', getStatusClass(item.TrangThai)]">
-                                {{ item.TrangThai }}
+                            <span :class="['status', getStatusClass(item?.TrangThai)]">
+                                {{ item?.TrangThai }}
                             </span>
                         </p>
+
+                        <p v-if="item?.TrangThai === 'Từ chối'">
+                            <strong>Lý do từ chối: </strong>
+                            <span class="reject-reason">{{ item?.Lydo || "Không có lý do" }}</span>
+                        </p>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -43,18 +60,55 @@ const error = ref(null);
 
 const formatDate = (date) => new Date(date).toLocaleDateString("vi-VN");
 
+const defaultImage = "https://via.placeholder.com/200x280?text=No+Image";
+const allImages = import.meta.glob("../../assets/img/**/*.{jpg,jpeg,png,webp}", { eager: true });
+const groupedImages = {};
+
+Object.entries(allImages).forEach(([path, mod]) => {
+    const parts = path.split("/");
+    const folder = parts[parts.length - 2];
+    if (!groupedImages[folder]) groupedImages[folder] = [];
+    groupedImages[folder].push(mod.default);
+});
+
+const getBookImageCart = (s) => {
+    if (!s || !s.HinhAnh) return defaultImage;
+
+    if (s.HinhAnh.startsWith("http")) return s.HinhAnh;
+
+    if (s.HinhAnh.startsWith("./img/")) {
+        const relativePath = s.HinhAnh.replace("./", "../assets/");
+        const found = Object.values(groupedImages)
+            .flat()
+            .find((imgPath) => imgPath.includes(relativePath.split("/").pop()));
+        return found || defaultImage;
+    }
+
+    if (s.HinhAnh.startsWith("/uploads/")) {
+        return `http://localhost:5000${s.HinhAnh}`;
+    }
+
+    return defaultImage;
+};
+
 const getStatusClass = (status) => {
     switch (status) {
         case "Chờ duyệt":
             return "pending";
-        case "Đang mượn":
+        case "Đã duyệt - Đang mượn":
             return "active";
         case "Đã trả":
             return "done";
+        case "Quá hạn":
+            return "overdue";
+        case "Từ chối":
+            return "rejected";
         default:
             return "";
     }
 };
+
+
 
 onMounted(async () => {
     try {
@@ -64,24 +118,26 @@ onMounted(async () => {
             return;
         }
 
-        // 🟢 Lấy thông tin độc giả hiện tại
+        // 🟢 Cập nhật trạng thái Quá hạn trong DB
+        await api.put("/theodoimuonsach/capnhat-quahan");
+
+        // 🟢 Lấy profile
         const profileRes = await axios.get("http://localhost:3000/api/docgia/profile", {
             headers: { Authorization: `Bearer ${token}` },
         });
         const maDocGia = profileRes.data.MaDocGia;
 
-        // 🟢 Lấy danh sách mượn sách của độc giả
-        const res = await api.get(`/theodoimuonsach/docgia/${maDocGia}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        // 🟢 Lấy danh sách mượn theo độc giả
+        const res = await api.get(`/theodoimuonsach/docgia/${maDocGia}`);
         records.value = res.data || [];
+
     } catch (err) {
-        console.error("❌ Lỗi khi tải dữ liệu mượn:", err);
-        error.value = err.response?.data?.message || "Không thể tải dữ liệu mượn sách.";
+        console.error("❌ Lỗi khi tải dữ liệu:", err);
     } finally {
         loading.value = false;
     }
 });
+
 </script>
 <style scoped>
 .borrow-page {
@@ -170,6 +226,14 @@ h2 {
     background-color: #4caf50;
 }
 
+.status.overdue {
+    background-color: #d32f2f;
+}
+
+.status.rejected {
+    background-color: #9c27b0;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -180,5 +244,30 @@ h2 {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.book-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.stt {
+    background: #8b4513;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.book-img {
+    width: 90px;
+    height: 120px;
+    border-radius: 6px;
+    object-fit: cover;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 </style>

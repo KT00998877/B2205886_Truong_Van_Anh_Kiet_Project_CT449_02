@@ -1,6 +1,6 @@
 <template>
-    <div class="profile-page">
-        <div class="profile-card">
+    <div class="container-fluid">
+        <div class="card">
             <h2>Thông tin độc giả</h2>
             <div v-if="loading" class="loading">Đang tải...</div>
             <div v-else-if="error" class="error">{{ error }}</div>

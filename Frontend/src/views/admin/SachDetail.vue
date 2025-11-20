@@ -15,13 +15,15 @@
                 <p class="detail-quantity"><strong>Số quyển còn:</strong> {{ sach.SoQuyen }}</p>
                 <p class="detail-price"><strong>Giá:</strong> {{ sach.DonGia.toLocaleString() }}₫</p>
 
-                <p class="detail-desc" v-if="sach.ChiTiet">
-                    <strong>Mô tả:</strong> {{ sach.ChiTiet }}
-                </p>
+                <div class="desc" v-if="sach.ChiTiet">
+                    <h3>Mô tả</h3>
+                    <p>{{ sach.ChiTiet }}</p>
+                </div>
+
 
                 <div class="detail-actions">
-                    <button class="btn update" @click="updateSach">✏️ Cập nhật</button>
-                    <button class="btn delete" @click="deleteSach">🗑 Xoá</button>
+                    <button class="btn update" @click="updateSach">Cập nhật</button>
+                    <button class="btn delete" @click="deleteSach">Xoá</button>
                 </div>
             </div>
         </div>
@@ -44,16 +46,17 @@ export default {
     async mounted() {
         const id = this.$route.params.id;
         try {
-            const res = await api.get(`/sach/${id}`);
+            const res = await api.get(`/sach/id/${id}`);
             this.sach = res.data;
         } catch (err) {
             console.error("❌ Lỗi khi tải chi tiết sách:", err);
         }
 
-        // import toàn bộ ảnh để dùng được cho ./img/... đường dẫn
-        const imgs = import.meta.glob("../assets/img/**/*.{jpg,jpeg,png,webp}", { eager: true });
+        const imgs = import.meta.glob("../../assets/img/**/*.{jpg,jpeg,png,webp}", { eager: true });
+
         this.allImages = Object.values(imgs);
     },
+
 
     methods: {
         getBookImage(s) {
@@ -95,10 +98,44 @@ export default {
 </script>
 
 <style scoped>
+
 .detail-container {
-    padding: 40px;
-    background-color: #f8f9fc;
-    min-height: 100vh;
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.detail-content {
+    display: flex;
+    gap: 30px;
+}
+
+.detail-img {
+    width: 280px;
+    height: 380px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.detail-info {
+    flex: 1;
+    font-size: 18px;
+}
+
+.desc {
+    margin-top: 10px;
+    line-height: 1.6;
+}
+
+.btn-back {
+    margin-top: 20px;
+    padding: 10px 18px;
+    background: #8b4513;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
 .back-btn {
@@ -110,27 +147,13 @@ export default {
     margin-bottom: 20px;
 }
 
-.detail-content {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 40px;
-    background: #fff;
-    border-radius: 14px;
-    padding: 30px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+
 
 .detail-left {
     flex: 1 1 300px;
     text-align: center;
 }
 
-.detail-img {
-    width: 100%;
-    max-width: 300px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
 
 .detail-right {
     flex: 2 1 400px;

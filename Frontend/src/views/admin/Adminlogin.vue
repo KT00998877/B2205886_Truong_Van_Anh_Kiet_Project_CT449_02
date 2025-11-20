@@ -37,10 +37,4 @@ const handleLogin = async () => {
 };
 </script>
 
-<style scoped>
-.login-container {
-    max-width: 400px;
-    margin: 80px auto;
-    text-align: center;
-}
-</style>
+

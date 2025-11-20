@@ -82,7 +82,7 @@ export default {
             try {
                 await api.put(`/sach/${this.form._id}`, this.form);
                 alert("✅ Cập nhật thành công!");
-                this.$router.push("/sach");
+                this.$router.push("/admin/sach");
             } catch (err) {
                 console.error("❌ Lỗi khi cập nhật sách:", err);
                 alert("Không thể cập nhật sách!");
@@ -93,7 +93,7 @@ export default {
             try {
                 await api.delete(`/sach/${this.form._id}`);
                 alert("🗑️ Đã xóa sách!");
-                this.$router.push("/sach");
+                this.$router.push("/admin/sach");
             } catch (err) {
                 console.error("❌ Lỗi khi xóa sách:", err);
                 alert("Không thể xóa sách!");

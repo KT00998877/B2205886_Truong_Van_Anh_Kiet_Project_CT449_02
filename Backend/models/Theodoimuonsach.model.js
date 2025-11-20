@@ -11,6 +11,7 @@ const theodoimuonsachSchema = new mongoose.Schema(
     NgayMuon: { type: Date, required: true },
     HanTra: { type: Date, required: true },
     TrangThai: { type: String, required: true },
+    Lydo: {type: String},
   },
   { collection: "theodoimuonsach" }
 );

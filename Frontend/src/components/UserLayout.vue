@@ -1,27 +1,47 @@
 <template>
-    <div class="layout">
-        <div class="sidebar">
-            <div class="logo-section">
-                <img src="../assets/img/logo.jpg" class="logo-image" alt="Library Logo" />
-                <h2 class="logo-text">Thư viện Văn hiến</h2>
+    <div>
+        <!-- NAVBAR -->
+        <nav class="navbar">
+            <div class="nav-left">
+                <img src="../assets/img/logo.jpg" class="navbar-logo" />
+                <span class="nav-title">Quản Lí Thư Viện</span>
             </div>
-            <hr></hr>
-            <ul class="menu">
-                <li @click="goTo('/user/sach')" :class="{ active: isActive('/user/sach') }">📖 Danh sách Sách</li>
-                <li @click="goTo('/user/muonsach')" :class="{ active: isActive('/user/muonsach') }">📥 Chi tiết Mượn
-                    Sách</li>
-                <li @click="goTo('/user/profile')" :class="{ active: isActive('/user/profile') }">👤 Hồ sơ cá nhân</li>
-            </ul>
+
+            <div class="nav-right">
+
+                <NotificationBell class="me-3" />
+
+                <button class="btn-cart btn btn-warning me-2" @click="goTo('/user/cart')">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </button>
+                <button @click="goTo('/user/login')" class="btn btn-danger">Đăng xuất</button>
+            </div>
+        </nav>
+        <div class="main-wrapper">
+
+
+            <div class="sidebar">
+                <ul class="menu">
+                    <li @click="goTo('/user/sach')" :class="{ active: isActive('/user/sach') }"> Danh sách Sách</li>
+                    <li @click="goTo('/user/muonsach')" :class="{ active: isActive('/user/muonsach') }"> Chi tiết Mượn
+                        Sách</li>
+                    <li @click="goTo('/user/profile')" :class="{ active: isActive('/user/profile') }"> Hồ sơ cá nhân
+                    </li>
+                </ul>
+            </div>
+            <!-- CONTENT -->
+            <main class="content">
+                <router-view />
+            </main>
+
         </div>
-        <!-- Nội dung chính -->
-        <div class="content">
-            <router-view />
-        </div>
+
     </div>
 </template>
 
 <script setup>
 import { useRouter, useRoute } from "vue-router";
+import NotificationBell from "./NotificationBell.vue";
 const router = useRouter();
 const route = useRoute();
 
@@ -33,6 +53,7 @@ const isActive = (path) => {
 
     return route && route.path === path;
 };
+
 </script>
 <style scoped>
 .logo-section {

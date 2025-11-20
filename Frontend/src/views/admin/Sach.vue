@@ -1,6 +1,6 @@
 <template>
-    <div class="sach-container">
-        <h2>📚 Danh Sách Sách</h2>
+    <h1 class="text-center"> Danh Sách</h1>
+    <div class="container">
 
         <!-- Thanh lọc và sắp xếp -->
         <div class="filter-bar">
@@ -12,6 +12,7 @@
             </select>
 
             <input type="text" v-model="searchQuery" placeholder="🔍 Tìm kiếm sách..." @input="applyFilters" />
+            <input type="text" v-model="searchAuthor" placeholder="✍️ Tìm theo tác giả..." @input="applyFilters" />
 
             <select v-model="sortBy" @change="applyFilters">
                 <option value="">Sắp xếp</option>
@@ -40,7 +41,7 @@
 
                 <!-- Nút thao tác -->
                 <div class="book-actions">
-                    <button class="btn update" @click="$router.push(`/sach/edit/${s._id}`)">✏️ Cập nhật</button>
+                    <button class="btn update" @click="$router.push(`/admin/sach/edit/${s._id}`)">✏️ Cập nhật</button>
                     <button class="btn delete" @click.stop="deleteSach(s._id)">🗑 Xoá</button>
                 </div>
             </div>
@@ -62,6 +63,7 @@ export default {
             theloais: [],
             selectedTheLoai: "",
             searchQuery: "",
+            searchAuthor: "",
             sortBy: "",
             defaultImage: "https://via.placeholder.com/200x280?text=No+Image",
         };
@@ -121,6 +123,13 @@ export default {
                         s.TacGia.toLowerCase().includes(q)
                 );
             }
+
+            if (this.searchAuthor) {
+                const a = this.searchAuthor.toLowerCase();
+                filtered = filtered.filter((s) =>
+                    s.TacGia.toLowerCase().includes(a)
+                );
+            }
             switch (this.sortBy) {
                 case "tenAsc":
                     filtered.sort((a, b) => a.TenSach.localeCompare(b.TenSach));
@@ -146,19 +155,19 @@ export default {
 
         // 👁 Xem chi tiết
         viewDetail(s) {
-            this.$router.push(`/sach/${s._id}`);
+            this.$router.push(`/admin/sach/id/${s._id}`);
         },
 
         // ✏️ Cập nhật
         updateSach(s) {
-            this.$router.push(`/sach/edit/${s._id}`);
+            this.$router.push(`/admin/sach/edit/${s._id}`);
         },
 
         // 🗑 Xoá
         async deleteSach(id) {
             if (!confirm("Bạn có chắc muốn xoá sách này không?")) return;
             try {
-                await api.delete(`/sach/${id}`);
+                await api.delete(`/admin/sach/${id}`);
                 this.sachs = this.sachs.filter((item) => item._id !== id);
                 this.applyFilters();
                 alert("Đã xoá thành công ✅");

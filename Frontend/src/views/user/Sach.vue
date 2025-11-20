@@ -1,6 +1,6 @@
 <template>
-    <div class="sach-container">
-        <h2>📚 Danh Sách Sách</h2>
+    <div class="container">
+        <h2> Danh Sách </h2>
 
         <!-- Thanh lọc và sắp xếp -->
         <div class="filter-bar">
@@ -12,6 +12,7 @@
             </select>
 
             <input type="text" v-model="searchQuery" placeholder="🔍 Tìm kiếm sách..." @input="applyFilters" />
+            <input type="text" v-model="searchAuthor" placeholder="✍️ Tìm theo tác giả..." @input="applyFilters" />
 
             <select v-model="sortBy" @change="applyFilters">
                 <option value="">Sắp xếp</option>
@@ -41,14 +42,19 @@
                 <!-- Nút thao tác -->
                 <div class="book-actions">
                     <button class="btn-borrow" @click.stop="openBorrowForm(s)">
-                        📥 Mượn sách
+                        Mượn ngay
+                    </button>
+
+                    <button class="btn-cart" @click.stop="addToCart(s)">
+                        <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
                     </button>
                 </div>
+
             </div>
         </div>
         <div v-if="selectedBook" class="borrow-popup">
             <div class="borrow-form">
-                <h3>📘 Mượn: {{ selectedBook.TenSach }}</h3>
+                <h3> Mượn: {{ selectedBook.TenSach }}</h3>
 
                 <label>Ngày mượn</label>
                 <input type="date" v-model="borrowForm.NgayMuon" />
@@ -57,8 +63,8 @@
                 <input type="date" v-model="borrowForm.HanTra" />
 
                 <div class="form-buttons">
-                    <button @click="submitBorrow" class="btn-confirm">✅ Xác nhận</button>
-                    <button @click="closeBorrowForm" class="btn-cancel">❌ Hủy</button>
+                    <button @click="submitBorrow" class="btn-confirm"> Xác nhận</button>
+                    <button @click="closeBorrowForm" class="btn-cancel"> Hủy</button>
                 </div>
 
                 <p v-if="message" class="status-msg">{{ message }}</p>
@@ -82,6 +88,7 @@ export default {
             theloais: [],
             selectedTheLoai: "",
             searchQuery: "",
+            searchAuthor: "",
             sortBy: "",
             defaultImage: "https://via.placeholder.com/200x280?text=No+Image",
             selectedBook: null, 
@@ -140,8 +147,10 @@ export default {
 
         applyFilters() {
             let filtered = [...this.sachs];
+            // loc theo the loai
             if (this.selectedTheLoai)
                 filtered = filtered.filter((s) => s.TheLoai === this.selectedTheLoai);
+            // loc theo ten
             if (this.searchQuery) {
                 const q = this.searchQuery.toLowerCase();
                 filtered = filtered.filter(
@@ -150,6 +159,14 @@ export default {
                         s.TacGia.toLowerCase().includes(q)
                 );
             }
+            // loc theo tac gia
+            if (this.searchAuthor) {
+                const a = this.searchAuthor.toLowerCase();
+                filtered = filtered.filter((s) =>
+                    s.TacGia.toLowerCase().includes(a)
+                );
+            }
+            // sap xep
             switch (this.sortBy) {
                 case "tenAsc":
                     filtered.sort((a, b) => a.TenSach.localeCompare(b.TenSach));
@@ -175,7 +192,7 @@ export default {
 
         // 👁 Xem chi tiết
         viewDetail(s) {
-            this.$router.push(`/sach/${s._id}`);
+            this.$router.push(`/user/sach/id/${s._id}`);
         },
 
         openBorrowForm(s) {
@@ -222,16 +239,30 @@ export default {
             }
         },
 
+        async addToCart(s) {
+            try {
+                const token = localStorage.getItem("token");
+
+                await api.post(
+                    "/cart/add",
+                    { MaSach: s._id, SoLuong: 1 },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+
+                alert("📚 Đã thêm vào giỏ sách!");
+            } catch (err) {
+                console.error("❌ Lỗi khi thêm vào giỏ:", err);
+                alert("Không thể thêm vào giỏ!");
+            }
+        },
+
+
     },
 };
 </script>
 
 <style scoped>
-.sach-container {
-    background-color: #f8f9fc;
-    padding: 40px;
-    min-height: 100vh;
-}
+
 
 h2 {
     font-size: 28px;

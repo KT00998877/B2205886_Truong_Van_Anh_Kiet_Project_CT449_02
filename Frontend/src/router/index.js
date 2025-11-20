@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import AdminLayout from "../components/AdminLayout.vue";
 import UserLayout from "../components/UserLayout.vue";
+import Dasboard from "../components/Dasboard.vue";
 
 // --- USER VIEWS ---
 import UserLogin from "../views/user/Userlogin.vue";
@@ -9,6 +10,8 @@ import UserRegister from "../views/user/UserRegister.vue";
 import SachUser from "../views/user/Sach.vue";
 import Profile from "../views/user/Profile.vue";
 import MuonSach from "../views/user/Chitietmuonsach.vue";
+import SachDetailUser from "../views/user/SachDetail.vue";
+import CartUser from "../views/user/Cart.vue";
 
 // --- ADMIN VIEWS ---
 import AdminLogin from "../views/admin/Adminlogin.vue";
@@ -24,6 +27,11 @@ import MuonSachAdmin from "../views/admin/MuonSachAdmin.vue";
 import NotFound from "../views/errors/NotFound.vue";
 
 const routes = [
+  {
+    path: "/dasboard",
+    name: "Dasboard",
+    component: Dasboard,
+  },
   /* =============================
      🔹 USER AUTH ROUTES (Login/Register)
   ============================== */
@@ -57,7 +65,7 @@ const routes = [
     children: [
       { path: "docgia", name: "DocGia", component: DocGia },
       { path: "sach", name: "Sach", component: Sach },
-      { path: "sach/:id", name: "SachDetail", component: SachDetail },
+      { path: "sach/id/:id", name: "SachDetail", component: SachDetail },
       { path: "sach/edit/:id", name: "SachEdit", component: SachEdit },
       { path: "nhanvien", name: "NhanVien", component: NhanVien },
       { path: "users", name: "User", component: User },
@@ -70,13 +78,20 @@ const routes = [
     meta: { requiresUser: true },
     children: [
       { path: "sach", name: "SachUser", component: SachUser },
+      { path: "cart", name: "CartUser", component: CartUser},
       { path: "profile", name: "Profile", component: Profile },
+      {
+        path: "sach/id/:id",
+        name: "SachDetailUser",
+        component: SachDetailUser,
+      },
+
       { path: "muonsach", name: "MuonSach", component: MuonSach },
     ],
   },
-  
+
   // Mặc định vào trang login của user
-  { path: "/", redirect: "/user/login" },
+  { path: "/", redirect: "/dasboard" },
 
   /* =============================
      🔹 404 PAGE

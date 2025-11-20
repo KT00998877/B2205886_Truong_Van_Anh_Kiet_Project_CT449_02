@@ -1,4 +1,6 @@
 import Sach from "../models/Sach.model.js";
+import mongoose from "mongoose";
+
 
 // Lấy tất cả sách
 export const getAllSach = async (req, res) => {
@@ -24,6 +26,38 @@ export const getSachByTheLoai = async (req, res) => {
       .json({ message: "Lỗi khi lấy sách theo thể loại", error: err });
   }
 };
+
+export const getSachById = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "ID không hợp lệ",
+        receivedId: id,
+      });
+    }
+
+    const sach = await Sach.findById(id);
+
+    if (!sach) {
+      return res.status(404).json({
+        message: "Không tìm thấy sách với ID này",
+        searchedId: id,
+      });
+    }
+
+    res.json(sach);
+  } catch (err) {
+    console.error("❌ Lỗi getSachById:", err);
+    res.status(500).json({
+      message: "Lỗi server khi lấy sách",
+      error: err.message,
+    });
+  }
+};
+
 
 // Thêm mới sách
 export const createSach = async (req, res) => {

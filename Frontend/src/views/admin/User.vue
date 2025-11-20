@@ -1,6 +1,6 @@
 <template>
-    <div class="user-view">
-        <h1>👥 Quản lý Người Dùng</h1>
+    <div class="container">
+        <h1> Quản lý Người Dùng</h1>
 
         <!-- Nút mở form thêm -->
         <button class="open-form-btn" @click="showAddForm = true">➕ Thêm Người Dùng</button>

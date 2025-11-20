@@ -1,6 +1,6 @@
 <template>
-    <div class="docgia-container">
-        <h2>📚 Danh sách độc giả</h2>
+    <div class="container-fluid">
+        <h2> Danh sách độc giả</h2>
 
         <!-- Nút mở form thêm -->
         <button class="open-form-btn" @click="showAddForm = true">➕ Thêm Độc Giả</button>
