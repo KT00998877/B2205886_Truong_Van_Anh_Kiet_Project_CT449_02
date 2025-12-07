@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw; /* Full width màn hình */
   min-height: 100vh;
-  background-image: url('../img/background.jpg'); /* Path hình của bạn */
+  background-image: url('../img/background.jpg');
   background-size: cover;
   background-position: center center; /* Cân bằng center */
   background-attachment: fixed; /* Chiều sâu */

@@ -2,12 +2,12 @@
   <div class="container">
     <h1>Quản lí Nhân Viên</h1>
     <button class="open-form-btn" @click="showAddForm = true">
-      ➕ Thêm Nhân Viên
+       Thêm Nhân Viên
     </button>
     <!-- Form thêm nhân viên -->
     <div v-if="showAddForm" class="overlay">
       <div class="add-form">
-        <h3>➕ Thêm Nhân Viên</h3>
+        <h3> Thêm Nhân Viên</h3>
         <form @submit.prevent="addNhanVien">
           <label>Mã Nhân Viên:</label>
           <input v-model="newNhanVien.MSNV" required /> <label>Họ Tên:</label>
@@ -21,9 +21,9 @@
           <input v-model="newNhanVien.DiaChi" required /> <label>SĐT:</label>
           <input v-model="newNhanVien.SoDienThoai" required />
           <div class="form-actions">
-            <button type="submit" class="save-btn">💾 Lưu</button>
+            <button type="submit" class="save-btn"> Lưu</button>
             <button type="button" class="cancel-btn" @click="closeForm">
-              ❌ Huỷ
+               Huỷ
             </button>
           </div>
         </form>
@@ -32,7 +32,7 @@
     <!-- Form sửa nhân viên -->
     <div v-if="showEditForm" class="overlay">
       <div class="add-form">
-        <h3>✏️ Cập Nhật Nhân Viên</h3>
+        <h3> Cập Nhật Nhân Viên</h3>
         <form @submit.prevent="updateNhanVien">
           <label>Mã Nhân Viên:</label>
           <input v-model="editingNhanVien.MSNV" disabled />
@@ -47,9 +47,9 @@
           <label>SĐT:</label>
           <input v-model="editingNhanVien.SoDienThoai" required />
           <div class="form-actions">
-            <button type="submit" class="save-btn">💾 Lưu</button>
+            <button type="submit" class="save-btn"> Lưu</button>
             <button type="button" class="cancel-btn" @click="closeEditForm">
-              ❌ Huỷ
+               Huỷ
             </button>
           </div>
         </form>
@@ -77,9 +77,9 @@
           <td>{{ nv.DiaChi }}</td>
           <td>{{ nv.SoDienThoai }}</td>
           <td>
-            <button class="edit-btn" @click="editNhanVien(nv)">✏️ Sửa</button>
+            <button class="edit-btn" @click="editNhanVien(nv)"> Sửa</button>
             <button class="delete-btn" @click="deleteNhanVien(nv._id)">
-              🗑️ Xoá
+               Xoá
             </button>
           </td>
         </tr>

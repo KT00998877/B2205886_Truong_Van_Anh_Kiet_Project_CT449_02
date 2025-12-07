@@ -2,6 +2,7 @@
     <div class="auth-page">
         <div class="content-wrapper">
             <div class="login-container">
+                <h2>Chào mừng bạn đến với Thư viện Văn Hiến</h2>
                 <img src="../../assets/img/logo.jpg" alt="User Login">
                 <h2>Đăng nhập</h2>
                 <form @submit.prevent="handleLogin">

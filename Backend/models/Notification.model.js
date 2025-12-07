@@ -5,20 +5,10 @@ const notificationSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      
     },
     type: {
       type: String,
-      enum: [
-        "muon_sach",
-        "duyet_muon",
-        "tu_choi_muon",
-        "tra_sach",
-        "sap_het_han",
-        "qua_han",
-        "mat_sach",
-        "yeu_cau_muon_moi", // Cho admin
-      ],
       required: true,
     },
     title: {

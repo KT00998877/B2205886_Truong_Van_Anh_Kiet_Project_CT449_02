@@ -9,12 +9,18 @@
 
             <div class="nav-right">
 
+                <span class="text-white align-items-center fs-5 me-5">
+                    <i class="fa-solid fa-user me-2"></i> Xin chào {{ HoLot }} {{ Ten }}
+                </span>
+
                 <NotificationBell class="me-3" />
 
-                <button class="btn-cart btn btn-warning me-2" @click="goTo('/user/cart')">
+                <button class="btn-cart btn btn-warning me-3" @click="goTo('/user/cart')">
                     <i class="fa-solid fa-cart-shopping"></i>
                 </button>
-                <button @click="goTo('/user/login')" class="btn btn-danger">Đăng xuất</button>
+
+
+                <button @click="goTo('/user/login')" class="btn btn-danger me-5">Đăng xuất</button>
             </div>
         </nav>
         <div class="main-wrapper">
@@ -22,10 +28,17 @@
 
             <div class="sidebar">
                 <ul class="menu">
-                    <li @click="goTo('/user/sach')" :class="{ active: isActive('/user/sach') }"> Danh sách Sách</li>
-                    <li @click="goTo('/user/muonsach')" :class="{ active: isActive('/user/muonsach') }"> Chi tiết Mượn
+                    <li @click="goTo('/user/sach')" :class="{ active: isActive('/user/sach') }"> Thư viện sách</li>
+                    <li @click="goTo('/user/sachnew')" :class="{ active: isActive('/user/sachnew') }"> Sách mới</li>
+                    <li @click="goTo('/user/cart')" :class="{ active: isActive('/user/cart') }"> Xem sách trong giỏ</li>
+                    
+                    <li @click="goTo('/user/muonsach')" :class="{ active: isActive('/user/muonsach') }"> Lịch Sử Mượn
                         Sách</li>
                     <li @click="goTo('/user/profile')" :class="{ active: isActive('/user/profile') }"> Hồ sơ cá nhân
+                    </li>
+
+                    <li @click="goTo('/user/phieuphat')" :class="{ active: isActive('/user/phieuphat') }"> Phiếu phạt
+                        của tôi
                     </li>
                 </ul>
             </div>
@@ -42,19 +55,41 @@
 <script setup>
 import { useRouter, useRoute } from "vue-router";
 import NotificationBell from "./NotificationBell.vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
+
 const router = useRouter();
 const route = useRoute();
 
-const goTo = (path) => {
-    router.push(path);
-};
+const userName = ref("");
+const HoLot = ref("");
+const Ten = ref("");
 
-const isActive = (path) => {
+// 🔥 Lấy tên user từ API /docgia/profile
+onMounted(async () => {
+    try {
+        const token = localStorage.getItem("token");
 
-    return route && route.path === path;
-};
+        const res = await axios.get("http://localhost:3000/api/docgia/profile", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
+        // backend trả userId.username
+        userName.value = res.data.userId.username;
+        HoLot.value = res.data.HoLot;
+        Ten.value = res.data.Ten;
+
+    } catch (err) {
+        console.error("Lỗi lấy username:", err);
+    }
+});
+
+const goTo = (path) => router.push(path);
+const isActive = (path) => route && route.path === path;
 </script>
+
 <style scoped>
 .logo-section {
     display: flex;

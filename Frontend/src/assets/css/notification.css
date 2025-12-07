@@ -1,0 +1,238 @@
+
+.noti-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.bell {
+    cursor: pointer;
+    font-size: 26px;
+    position: relative;
+    color: #110f0f;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.bell:hover {
+    background: #f0f2f5;
+    color: #000;
+    transform: translateY(-2px);
+}
+
+
+.badge-noti {
+    position: absolute;
+    top: 2px;          
+    right: 2px;          
+    background: #e63946;
+    color: white!important;
+    font-size: 9.5px!important;    
+    font-weight: 700!important;
+    min-width: 14px;     
+    height: 14px;        
+    padding: 0 4px!important;
+    border-radius: 50px!important;
+    border: 2px solid #fff;  
+    display: flex!important;
+    align-items: center!important;
+    justify-content: center!important;
+    line-height: 1!important;
+    animation: pulse-small 2s infinite; 
+}
+
+@keyframes pulse-small {
+    0% {
+        box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 5px rgba(230, 57, 70, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(230, 57, 70, 0);
+    }
+}
+
+
+.login-hint {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 11px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Dropdown chính */
+.noti-box {
+    position: absolute;
+    top: 48px;
+    right: 0;
+    width: 380px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15), 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e8e8e8;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+/* Mũi tên chỉ lên chuông */
+.noti-box::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 18px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid #fff;
+    filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Header */
+.noti-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.noti-header h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.mark-all {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.mark-all:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+/* Nội dung */
+.noti-content {
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+/* Tùy chỉnh thanh cuộn */
+.noti-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.noti-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.noti-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.noti-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Item thông báo */
+.noti-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+}
+
+.noti-item:hover {
+    background: #f8f9ff;
+    transform: translateX(4px);
+}
+
+/* Điểm xanh khi chưa đọc */
+.noti-item.unread::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: #4e80ee;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(78, 128, 238, 0.6);
+}
+
+.noti-item.unread {
+    background: linear-gradient(90deg, #f0f4ff 0%, #fafbff 100%);
+    font-weight: 500;
+}
+
+.noti-title {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+}
+
+.noti-msg {
+    font-size: 13.5px;
+    color: #555;
+    line-height: 1.4;
+    margin-bottom: 6px;
+}
+
+.noti-time {
+    font-size: 12px;
+    color: #999;
+    align-self: flex-end;
+}
+
+.no-data {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+    font-size: 14.5px;
+}
+
+.no-data p {
+    margin: 12px 0 0;
+}
+
+/* Hiệu ứng mở/đóng mượt hơn */
+.fade-enter-active,
+.fade-leave-active {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+    transform: translateY(-10px, -20px);
+}
+
+.text-muted {
+    opacity: 0.4;
+}

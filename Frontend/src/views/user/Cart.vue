@@ -98,7 +98,7 @@ const getBookImageCart = (s) => {
 
     // Nếu là ảnh upload
     if (s.HinhAnh.startsWith("/uploads/")) {
-        return `http://localhost:5000${s.HinhAnh}`;
+        return `http://localhost:3000${s.HinhAnh}`;
     }
 
     return defaultImage;
@@ -216,6 +216,7 @@ const decreaseQty = async (id) => {
     font-size: 26px;
     font-weight: 700;
     margin-bottom: 20px;
+    text-align: center;
     display: flex;
     gap: 10px;
     align-items: center;

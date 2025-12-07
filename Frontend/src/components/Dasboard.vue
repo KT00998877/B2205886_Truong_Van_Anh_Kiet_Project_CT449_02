@@ -1,10 +1,15 @@
 <template>
-    <div class="select-container">
-        <h1>Chào mừng bạn đến với Thư viện Văn Hiến</h1>
-
-        <div class="btn-group">
-            <button @click="goAdmin">Đăng nhập Admin</button>
-            <button @click="goUser">Đăng nhập User</button>
+    <div class="auth-page">
+        <div class="content-wrapper">
+            <div class="select-container d-flex flex-column align-items-center justify-content-center text-center">
+                <h1 class="text-light mb-4 display-4 fw-bold">Chào mừng bạn đến với Thư viện Văn Hiến</h1>
+                <div class="btn-group btn-group-lg">
+                    <button @click="goAdmin" class="btn btn-outline-warning me-2 rounded-pill text-light fs-4 px-4 py-2">Đăng nhập
+                        Admin</button>
+                    <button @click="goUser" class="btn btn-outline-warning rounded-pill text-light fs-4 px-4 py-2">Đăng nhập
+                        User</button>
+                </div>
+            </div>
         </div>
     </div>
 </template>

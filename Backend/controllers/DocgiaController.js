@@ -14,6 +14,30 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ message: "Lỗi server", error: error.message });
   }
 };
+//update profile
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const updated = await DocGia.findOneAndUpdate(
+      { userId: userId }, // Tìm theo userId
+      req.body, // Dữ liệu gửi lên
+      { new: true } // Trả về bản cập nhật
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Không tìm thấy độc giả!" });
+    }
+
+    res.json({
+  message: "Cập nhật thành công!",
+  data: await DocGia.findOne({ userId }).populate("userId", "username email")
+});
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};
+
 
 // 📘 Lấy tất cả độc giả
 export const getAllDocGia = async (req, res) => {

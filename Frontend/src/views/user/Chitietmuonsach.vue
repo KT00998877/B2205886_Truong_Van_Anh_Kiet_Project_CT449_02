@@ -37,10 +37,12 @@
                             </span>
                         </p>
 
-                        <p v-if="item?.TrangThai === 'Từ chối'">
-                            <strong>Lý do từ chối: </strong>
+                        <p v-if="['Từ chối', 'Mất sách'].includes(item?.TrangThai)">
+                            <strong>Lý do:</strong>
                             <span class="reject-reason">{{ item?.Lydo || "Không có lý do" }}</span>
                         </p>
+
+
                     </div>
 
                 </div>
@@ -103,6 +105,8 @@ const getStatusClass = (status) => {
             return "overdue";
         case "Từ chối":
             return "rejected";
+        case "Mất sách":
+            return "lost";    
         default:
             return "";
     }
@@ -232,6 +236,12 @@ h2 {
 
 .status.rejected {
     background-color: #9c27b0;
+}
+
+.status.lost {
+    background-color: #6a040f;
+    color: #fff;
+    border: 1px solid #ffccd5;
 }
 
 @keyframes fadeIn {

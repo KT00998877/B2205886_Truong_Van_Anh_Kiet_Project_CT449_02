@@ -62,13 +62,29 @@ export const getSachById = async (req, res) => {
 // Thêm mới sách
 export const createSach = async (req, res) => {
   try {
-    const sach = new Sach(req.body);
+    const data = req.body;
+
+    if (req.file) {
+      data.HinhAnh = `/uploads/${data.TheLoai}/${req.file.filename}`;
+    }
+
+
+    const sach = new Sach(data);
     await sach.save();
-    res.status(201).json({ message: "Thêm sách thành công!", sach });
+
+    res.status(201).json({
+      message: "Thêm sách thành công!",
+      sach,
+    });
   } catch (err) {
-    res.status(400).json({ message: "Lỗi khi thêm sách", error: err });
+    console.error("❌ Lỗi createSach:", err);
+    res.status(500).json({
+      message: "Lỗi khi thêm sách",
+      error: err.message,
+    });
   }
 };
+
 
 // Cập nhật sách
 export const updateSach = async (req, res) => {
@@ -76,33 +92,26 @@ export const updateSach = async (req, res) => {
     const id = req.params.id;
     const data = req.body;
 
-    console.log("📩 Dữ liệu nhận được:", data);
-
-    // kiểm tra id hợp lệ
-    if (!id) {
-      return res.status(400).json({ message: "Thiếu ID sách" });
-    }
-
-    const sach = await Sach.findById(id);
-    if (!sach) {
-      return res
-        .status(404)
-        .json({ message: "Không tìm thấy sách để cập nhật" });
+    // Nếu người dùng upload ảnh mới
+    if (req.file) {
+      data.HinhAnh = "/uploads/" + req.file.filename;
     }
 
     const updated = await Sach.findByIdAndUpdate(id, data, { new: true });
 
     res.json({
-      message: "✅ Cập nhật thành công",
+      message: "Cập nhật thành công",
       sach: updated,
     });
   } catch (err) {
-    console.error("❌ Chi tiết lỗi updateSach:", err);
-    res
-      .status(500)
-      .json({ message: "Lỗi server khi cập nhật sách", error: err.message });
+    console.error("❌ Lỗi updateSach:", err);
+    res.status(500).json({
+      message: "Lỗi khi cập nhật sách",
+      error: err.message,
+    });
   }
 };
+
 
 // Xoá sách
 export const deleteSach = async (req, res) => {

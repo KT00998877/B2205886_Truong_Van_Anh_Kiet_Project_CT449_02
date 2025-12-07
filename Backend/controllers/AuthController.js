@@ -84,7 +84,17 @@ const AuthController = {
         { expiresIn: "1d" }
       );
 
-      res.json({ message: "Đăng nhập thành công", token });
+      // ✅ THÊM: Trả về thông tin user (không bao gồm password)
+      res.json({
+        message: "Đăng nhập thành công",
+        token,
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        },
+      });
     } catch (error) {
       res.status(500).json({ message: "Lỗi server", error: error.message });
     }
@@ -107,7 +117,17 @@ const AuthController = {
         { expiresIn: "1d" }
       );
 
-      res.json({ message: "Đăng nhập thành công", token });
+      // ✅ THÊM: Trả về thông tin admin GIỐNG user
+      res.json({
+        message: "Đăng nhập thành công",
+        token,
+        user: {
+          id: admin._id,
+          username: admin.username,
+          email: admin.email,
+          role: admin.role,
+        },
+      });
     } catch (error) {
       res.status(500).json({ message: "Lỗi server", error: error.message });
     }

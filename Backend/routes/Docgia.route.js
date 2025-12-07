@@ -5,13 +5,15 @@ import {
   createDocGia,
   updateDocGia,
   deleteDocGia,
-  getProfile
+  getProfile,
+  updateProfile,
 } from "../controllers/DocgiaController.js";
 import AuthController from "../controllers/AuthController.js";
 
 const router = express.Router();
 
 router.get("/profile", AuthController.verifyToken, getProfile);
+router.put("/profile", AuthController.verifyToken, updateProfile);
 router.get("/", getAllDocGia); // Lấy tất cả
 router.get("/:id", getDocGiaById); // Lấy 1 độc giả
 router.post("/", createDocGia); // Thêm mới

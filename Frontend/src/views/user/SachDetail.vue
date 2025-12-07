@@ -7,6 +7,7 @@
                 <h2>{{ book.TenSach }}</h2>
                 <p><strong>Tác giả:</strong> {{ book.TacGia }}</p>
                 <p><strong>Thể loại:</strong> {{ book.TheLoai }}</p>
+                <p><strong>Nhà xuất bản:</strong> {{ getNXBName(book.MaNXB) }}</p>
                 <p><strong>Năm xuất bản:</strong> {{ book.NamXuatBan }}</p>
                 <p><strong>Giá:</strong> {{ book.DonGia.toLocaleString() }}₫</p>
                 <p><strong>Số quyển còn lại:</strong> {{ book.SoQuyen }}</p>
@@ -14,7 +15,7 @@
                 <h3> Mô tả</h3>
                 <p class="desc">{{ book.ChiTiet || "Không có mô tả." }}</p>
 
-                <button class="btn-back" @click="$router.back()">⬅ Quay lại</button>
+                <button class="btn-back" @click="goBack()">⬅ Quay lại</button>
             </div>
         </div>
     </div>
@@ -27,24 +28,29 @@ import api from "../../services/api";
 
 export default {
     name: "SachDetail",
+
     data() {
         return {
             book: null,
+            nhaxuatbans: [],
             defaultImage: "https://via.placeholder.com/250x350?text=No+Image",
             allImages: {},
         };
     },
 
-    async created() {
+    // ⚡ Lấy ảnh khi component được khởi tạo
+    created() {
         const all = import.meta.glob("../../assets/img/**/*.{jpg,jpeg,png,webp}", {
             eager: true,
         });
         this.allImages = all;
 
         this.loadBook();
+        this.loadNXB();
     },
 
     methods: {
+        // 🟢 Load thông tin 1 quyển sách
         async loadBook() {
             try {
                 const id = this.$route.params.id;
@@ -55,6 +61,27 @@ export default {
             }
         },
 
+        async loadNXB() {
+            try {
+                const res = await api.get("/nhaxuatban");
+                this.nhaxuatbans = res.data;
+            } catch (err) {
+                console.error("❌ Lỗi khi tải danh sách NXB:", err);
+            }
+        },
+
+        getNXBName(code) {
+            const nxb = this.nhaxuatbans.find(x => x.MaNXB === code);
+            return nxb ? nxb.TenNXB : code || "Chưa rõ";
+        },
+
+
+        // 🟢 Quay lại danh sách — ép router chuyển trang để reload dữ liệu
+        goBack() {
+            this.$router.back();
+        },
+
+        // 🟢 Xử lý ảnh sách
         getBookImage(book) {
             if (!book || !book.HinhAnh) return this.defaultImage;
 
@@ -70,7 +97,7 @@ export default {
             }
 
             if (book.HinhAnh.startsWith("/uploads/")) {
-                return "http://localhost:5000" + book.HinhAnh;
+                return "http://localhost:3000" + book.HinhAnh;
             }
 
             return this.defaultImage;
@@ -78,6 +105,7 @@ export default {
     },
 };
 </script>
+
 
 <style scoped>
 .detail-container {

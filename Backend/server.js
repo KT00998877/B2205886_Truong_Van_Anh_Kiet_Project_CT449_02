@@ -16,6 +16,7 @@ import userRoutes from "./routes/User.route.js";
 import CartRoutes from "./routes/Cart.route.js";
 import authRoutes from "./routes/Auth.route.js";
 import notificationRoutes from "./routes/Notification.route.js";
+import PhieuPhatRouteses from "./routes/PhieuPhat.route.js"
 
 // Tạo app và server HTTP
 const app = express();
@@ -30,18 +31,21 @@ export const io = new Server(httpServer, {
   },
 });
 
-// Bắt socket connection
+
+// Tìm phần socket connection và thêm logic join room
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  socket.on("join-user", (userId) => {
+    socket.join(userId.toString());
+  });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
   });
 });
 
 // Middleware
 app.use(cors({ origin: "http://localhost:8080", credentials: true }));
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
 // DB
 connectDB();
@@ -56,6 +60,7 @@ app.use("/api/theodoimuonsach", muonSachRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/cart", CartRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/phieuphat", PhieuPhatRouteses);
 
 // Run server
 const PORT = 3000;

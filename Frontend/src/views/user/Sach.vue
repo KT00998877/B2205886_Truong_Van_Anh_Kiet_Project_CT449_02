@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <h2> Danh Sách </h2>
+        <h1> Thư viện sách</h1>
 
         <!-- Thanh lọc và sắp xếp -->
         <div class="filter-bar">
@@ -8,6 +8,13 @@
                 <option value="">Tất cả thể loại</option>
                 <option v-for="theloai in theloais" :key="theloai" :value="theloai">
                     {{ (theloai) }}
+                </option>
+            </select>
+
+            <select v-model="selectedNXB" @change="applyFilters">
+                <option value="">Tất cả NXB</option>
+                <option v-for="nxb in nhaxuatbans" :key="nxb.MaNXB" :value="nxb.MaNXB">
+                    {{ nxb.TenNXB }}
                 </option>
             </select>
 
@@ -27,31 +34,41 @@
 
         <!-- Danh sách sách -->
         <div class="book-grid">
-            <div v-for="(s, idx) in filteredSachs" :key="s._id" class="book-card">
+            <div v-for="(s, idx) in paginatedSachs" :key="s._id" class="book-card">
                 <!-- Click vào ảnh hoặc tên để xem chi tiết -->
                 <div class="book-click" @click="viewDetail(s)">
                     <img :src="getBookImage(s, idx)" alt="Bìa sách" class="book-img" />
                     <div class="book-info">
                         <h4 class="book-title">{{ s.TenSach }}</h4>
                         <p class="book-author">{{ s.TacGia }}</p>
+                        <p class="book-publisher">Nhà xuất bản: {{ getNXBName(s.MaNXB) }}</p>
                         <p class="book-number"> Số sách còn lại: {{ s.SoQuyen }}</p>
-                        <p class="book-price">{{ s.DonGia.toLocaleString() }}₫</p>
+                        <!-- <p class="book-price">{{ s.DonGia.toLocaleString() }}₫</p> -->
                     </div>
                 </div>
 
                 <!-- Nút thao tác -->
                 <div class="book-actions">
-                    <button class="btn-borrow" @click.stop="openBorrowForm(s)">
-                        Mượn ngay
+                    <button class="btn-borrow" @click.stop="openBorrowForm(s)" :disabled="s.SoQuyen <= 0">
+                        {{ s.SoQuyen > 0 ? 'Mượn ngay' : 'Hết sách' }}
                     </button>
-
-                    <button class="btn-cart" @click.stop="addToCart(s)">
-                        <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
+                    <button class="btn-cart" @click.stop="addToCart(s)" :disabled="s.SoQuyen <= 0">
+                        <i v-if="s.SoQuyen > 0" class="fa-solid fa-cart-plus"></i>
+                        <i v-else class="fa-solid fa-ban"></i>
                     </button>
                 </div>
 
             </div>
         </div>
+        <!-- PHÂN TRANG -->
+        <div class="pagination">
+            <button @click="prevPage" :disabled="currentPage === 1">‹ Trước</button>
+
+            <span>Trang {{ currentPage }} / {{ totalPages }}</span>
+
+            <button @click="nextPage" :disabled="currentPage === totalPages">Sau ›</button>
+        </div>
+
         <div v-if="selectedBook" class="borrow-popup">
             <div class="borrow-form">
                 <h3> Mượn: {{ selectedBook.TenSach }}</h3>
@@ -85,34 +102,47 @@ export default {
             sach: {},
             sachs: [],
             filteredSachs: [],
+            nhaxuatbans: [], 
             theloais: [],
             selectedTheLoai: "",
+            selectedNXB: "",
             searchQuery: "",
             searchAuthor: "",
             sortBy: "",
             defaultImage: "https://via.placeholder.com/200x280?text=No+Image",
-            selectedBook: null, 
+            selectedBook: null,
             borrowForm: {
                 MaDocGia: "",
                 MaSach: "",
                 MSNV: "",
-                NgayMuon: "", 
+                NgayMuon: "",
                 HanTra: "",
             },
             message: "",
+            currentPage: 1,
+            pageSize: 8,
         };
     },
 
-    async mounted() {
-        try {
-            const res = await api.get("/sach");
-            this.sachs = res.data;
-            this.filteredSachs = res.data;
+    // ✅ Hook này chạy mỗi khi quay lại trang
+    async beforeRouteEnter(to, from, next) {
+        next(async (vm) => {
+            await vm.loadData();
+        });
+    },
 
-            // Lấy danh sách thể loại duy nhất
-            this.theloais = [...new Set(this.sachs.map((s) => s.TheLoai))];
-        } catch (err) {
-            console.error("❌ Lỗi khi tải dữ liệu sách:", err);
+    // ✅ CHỈ GIỮ 1 mounted() duy nhất
+    async mounted() {
+        await this.loadData();
+    },
+
+    computed: {
+        paginatedSachs() {
+            const start = (this.currentPage - 1) * this.pageSize;
+            return this.filteredSachs.slice(start, start + this.pageSize);
+        },
+        totalPages() {
+            return Math.ceil(this.filteredSachs.length / this.pageSize);
         }
     },
 
@@ -129,6 +159,23 @@ export default {
     },
 
     methods: {
+        // ✅ Tách logic load data thành method riêng
+        async loadData() {
+            try {
+                const res = await api.get("/sach");
+                this.sachs = res.data;
+                this.filteredSachs = res.data;
+
+                // Lấy danh sách thể loại duy nhất
+                this.theloais = [...new Set(this.sachs.map((s) => s.TheLoai))];
+
+                const resNXB = await api.get("/nhaxuatban");
+                this.nhaxuatbans = resNXB.data;
+            } catch (err) {
+                console.error("❌ Lỗi khi tải dữ liệu sách:", err);
+            }
+        },
+
         getBookImage(s, idx) {
             if (s.HinhAnh && s.HinhAnh.startsWith("http")) return s.HinhAnh;
             if (s.HinhAnh && s.HinhAnh.startsWith("./img/")) {
@@ -139,10 +186,15 @@ export default {
                 return found || this.defaultImage;
             }
             if (s.HinhAnh && s.HinhAnh.startsWith("/uploads/")) {
-                return `http://localhost:5000${s.HinhAnh}`;
+                return `http://localhost:3000${s.HinhAnh}`;
             }
             const allImages = Object.values(this.sach).flat();
             return allImages[idx % allImages.length] || this.defaultImage;
+        },
+
+        getNXBName(code) {
+            const nxb = this.nhaxuatbans.find(x => x.MaNXB === code);
+            return nxb ? nxb.TenNXB : code;
         },
 
         applyFilters() {
@@ -166,6 +218,11 @@ export default {
                     s.TacGia.toLowerCase().includes(a)
                 );
             }
+
+            if (this.selectedNXB) {
+                filtered = filtered.filter((s) => s.MaNXB === this.selectedNXB);
+            }
+            
             // sap xep
             switch (this.sortBy) {
                 case "tenAsc":
@@ -188,6 +245,7 @@ export default {
                     break;
             }
             this.filteredSachs = filtered;
+            this.currentPage = 1;
         },
 
         // 👁 Xem chi tiết
@@ -199,12 +257,11 @@ export default {
             this.selectedBook = s;
             const today = new Date().toISOString().split('T')[0];
             this.borrowForm = {
-                MaSach: s._id, 
+                MaSach: s._id,
                 MSNV: "",
-                NgayMuon: today, 
+                NgayMuon: today,
                 HanTra: "",
             };
-
             this.message = "";
         },
 
@@ -214,7 +271,7 @@ export default {
                 MaDocGia: "",
                 MaSach: "",
                 MSNV: "",
-                NgayMuon: "", 
+                NgayMuon: "",
                 HanTra: ""
             };
         },
@@ -256,8 +313,18 @@ export default {
             }
         },
 
+        nextPage() {
+            if (this.currentPage < this.totalPages) {
+                this.currentPage++;
+            }
+        },
 
-    },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
+        }
+    } 
 };
 </script>
 
@@ -275,10 +342,26 @@ h2 {
 
 .book-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 25px;
 }
+@media (max-width: 992px) {
+    .book-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
 
+@media (max-width: 768px) {
+    .book-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .book-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
 .book-card {
     background: #fff;
     border-radius: 14px;
@@ -485,9 +568,99 @@ h2 {
     margin-top: 10px;
 }
 
-/* Kế thừa style từ template cho các nút trong card (nếu cần) */
-.btn-borrow {
+.book-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 12px 16px;
+    width: 100%;
+}
+
+/* Cả 2 nút chung - nhỏ gọn hơn */
+.btn-borrow,
+.btn-cart {
+    flex: 1;
+    border: none;
+    padding: 8px 6px;
+    
+    border-radius: 10px;
+    
+    font-size: 14px;
+
+    font-weight: 600;
     cursor: pointer;
-    /* (Thêm các style khác nếu bạn chưa có) */
+    transition: all 0.2s ease;
+    min-height: 38px;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    
+}
+
+/* Nút Mượn ngay */
+.btn-borrow {
+    background: #28a745;
+    color: white;
+}
+
+.btn-borrow:hover {
+    background: #218838;
+}
+
+/* Nút Thêm vào giỏ */
+.btn-cart {
+    background: #fd7e14;
+    color: white;
+}
+
+.btn-cart:hover {
+    background: #e96b00;
+}
+
+/* Khi hết sách */
+.btn-borrow:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+
+@media (max-width: 480px) {
+
+    .btn-borrow,
+    .btn-cart {
+        font-size: 13.5px;
+        padding: 7px 5px;
+        min-height: 36px;
+    }
+}
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.pagination button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.pagination button:disabled {
+    background: #b0b0b0;
+    cursor: not-allowed;
+}
+
+.pagination span {
+    font-weight: bold;
+    font-size: 15px;
 }
 </style>

@@ -14,6 +14,11 @@
             </div>
 
             <div class="form-group">
+                <label> Chi Tiết</label>
+                <input type="text" v-model="form.ChiTiet" />
+            </div>
+
+            <div class="form-group">
                 <label>Tác Giả</label>
                 <input type="text" v-model="form.TacGia" />
             </div>
@@ -44,8 +49,8 @@
             </div>
 
             <div class="button-group">
-                <button type="submit" class="btn btn-update">💾 Lưu Thay Đổi</button>
-                <button type="button" class="btn btn-delete" @click="deleteSach">🗑️ Xóa Sách</button>
+                <button type="submit" class="btn btn-update"> Lưu Thay Đổi</button>
+                <button type="button" class="btn btn-delete" @click="deleteSach"> Xóa Sách</button>
             </div>
         </form>
     </div>

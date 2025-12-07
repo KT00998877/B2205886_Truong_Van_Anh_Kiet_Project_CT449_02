@@ -8,12 +8,15 @@ const sachSchema = new mongoose.Schema(
     SoQuyen: { type: Number, required: true },
     ChiTiet: { type: String },
     NamXuatBan: { type: Number },
-    MaNXB: { type: String },
+    MaNXB: {
+      type: String,
+      required: true,
+    },
     TacGia: { type: String },
-    TheLoai: { type: String, required: true }, 
+    TheLoai: { type: String, required: true },
     HinhAnh: { type: String },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 export default mongoose.model("Sach", sachSchema,"sach");

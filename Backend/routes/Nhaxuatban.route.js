@@ -1,17 +1,27 @@
 import express from "express";
-const router = express.Router();
 import {
-  getAllNhanVien,
-  getNhanVienById,
-  createNhanVien,
-  updateNhanVien,
-  deleteNhanVien,
-} from "../controllers/NhanvienController.js";
+  getAllNXB,
+  getNXBById,
+  createNXB,
+  updateNXB,
+  deleteNXB,
+} from "../controllers/NhaXuatBanController.js";
 
-router.get("/", getAllNhanVien);
-router.get("/:id", getNhanVienById);
-router.post("/", createNhanVien);
-router.put("/:id", updateNhanVien);
-router.delete("/:id", deleteNhanVien);
+const router = express.Router();
 
-export default router; 
+// Lấy tất cả nhà xuất bản
+router.get("/", getAllNXB);
+
+// Lấy 1 NXB theo _id
+router.get("/:id", getNXBById);
+
+// Thêm NXB
+router.post("/", createNXB);
+
+// Cập nhật NXB
+router.put("/:id", updateNXB);
+
+// Xoá NXB
+router.delete("/:id", deleteNXB);
+
+export default router;

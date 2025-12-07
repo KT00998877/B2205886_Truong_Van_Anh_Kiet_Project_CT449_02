@@ -12,6 +12,8 @@ import Profile from "../views/user/Profile.vue";
 import MuonSach from "../views/user/Chitietmuonsach.vue";
 import SachDetailUser from "../views/user/SachDetail.vue";
 import CartUser from "../views/user/Cart.vue";
+import PhieuPhat from "../views/user/PhieuPhat.vue";
+import SachNew from "../views/user/SachNew.vue";
 
 // --- ADMIN VIEWS ---
 import AdminLogin from "../views/admin/Adminlogin.vue";
@@ -22,9 +24,13 @@ import SachEdit from "../views/admin/SachEdit.vue";
 import NhanVien from "../views/admin/NhanVien.vue";
 import User from "../views/admin/User.vue";
 import MuonSachAdmin from "../views/admin/MuonSachAdmin.vue";
+import PhieuPhatAdmin from "../views/admin/PhieuPhatAdmin.vue";
+import SachAdd from "../views/admin/SachAdd.vue";
+import SachNewAd from "../views/admin/SachNew.vue";
 
 // --- ERROR VIEW ---
 import NotFound from "../views/errors/NotFound.vue";
+import { compile } from "vue";
 
 const routes = [
   {
@@ -64,12 +70,15 @@ const routes = [
     meta: { requiresAdmin: true },
     children: [
       { path: "docgia", name: "DocGia", component: DocGia },
+      { path: "sach/add", name: "SachAdd", component: SachAdd },
+      { path: "sach/new", name: "SachNewAd", component: SachNewAd },
       { path: "sach", name: "Sach", component: Sach },
       { path: "sach/id/:id", name: "SachDetail", component: SachDetail },
       { path: "sach/edit/:id", name: "SachEdit", component: SachEdit },
       { path: "nhanvien", name: "NhanVien", component: NhanVien },
       { path: "users", name: "User", component: User },
       { path: "muonsach", name: "MuonSachAdmin", component: MuonSachAdmin },
+      { path: "phieuphat", name: "PhieuPhatAdmin", component: PhieuPhatAdmin },
     ],
   },
   {
@@ -78,20 +87,22 @@ const routes = [
     meta: { requiresUser: true },
     children: [
       { path: "sach", name: "SachUser", component: SachUser },
-      { path: "cart", name: "CartUser", component: CartUser},
+      { path: "cart", name: "CartUser", component: CartUser },
       { path: "profile", name: "Profile", component: Profile },
       {
         path: "sach/id/:id",
         name: "SachDetailUser",
         component: SachDetailUser,
       },
+      { path: "phieuphat", name: "PhieuPhat", component: PhieuPhat },
 
       { path: "muonsach", name: "MuonSach", component: MuonSach },
+      { path: "sachnew", name: "SachNew", component: SachNew },
     ],
   },
 
   // Mặc định vào trang login của user
-  { path: "/", redirect: "/dasboard" },
+  { path: "/", redirect: "/user/login" },
 
   /* =============================
      🔹 404 PAGE

@@ -3,12 +3,12 @@
         <h1> Quản lý Người Dùng</h1>
 
         <!-- Nút mở form thêm -->
-        <button class="open-form-btn" @click="showAddForm = true">➕ Thêm Người Dùng</button>
+        <button class="open-form-btn" @click="showAddForm = true"> Thêm Người Dùng</button>
 
         <!-- Form thêm -->
         <div v-if="showAddForm" class="overlay">
             <div class="add-form">
-                <h3>➕ Thêm Người Dùng</h3>
+                <h3> Thêm Người Dùng</h3>
                 <form @submit.prevent="createUser">
                     <label>Username:</label>
                     <input v-model="newUser.username" required />
@@ -23,8 +23,8 @@
                     <input v-model="newUser.role" placeholder="admin hoặc user" required />
 
                     <div class="form-actions">
-                        <button type="submit" class="save-btn">💾 Lưu</button>
-                        <button type="button" class="cancel-btn" @click="closeForm">❌ Hủy</button>
+                        <button type="submit" class="save-btn"> Lưu</button>
+                        <button type="button" class="cancel-btn" @click="closeForm"> Hủy</button>
                     </div>
                 </form>
             </div>
@@ -33,7 +33,7 @@
         <!-- Form chỉnh sửa -->
         <div v-if="showEditForm" class="overlay">
             <div class="form-box">
-                <h3>✏️ Cập nhật Người Dùng</h3>
+                <h3> Cập nhật Người Dùng</h3>
                 <form @submit.prevent="updateUser">
                     <label>Username:</label>
                     <input v-model="editingUser.username" required />
@@ -45,8 +45,8 @@
                     <input v-model="editingUser.role" required />
 
                     <div class="form-actions">
-                        <button type="submit" class="save-btn">💾 Lưu</button>
-                        <button type="button" class="cancel-btn" @click="closeEditForm">❌ Hủy</button>
+                        <button type="submit" class="save-btn"> Lưu</button>
+                        <button type="button" class="cancel-btn" @click="closeEditForm"> Hủy</button>
                     </div>
                 </form>
             </div>
@@ -68,8 +68,8 @@
                     <td>{{ user.email }}</td>
                     <td>{{ user.role }}</td>
                     <td>
-                        <button @click="editUser(user)">✏️ Sửa</button>
-                        <button @click="deleteUser(user._id)">🗑️ Xóa</button>
+                        <button @click="editUser(user)"> Sửa</button>
+                        <button @click="deleteUser(user._id)"> Xóa</button>
                     </td>
                 </tr>
             </tbody>

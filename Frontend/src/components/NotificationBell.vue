@@ -1,11 +1,14 @@
 <template>
     <div class="noti-wrapper">
         <!-- Nút chuông -->
-        <div class="bell" @click="toggleDropdown">
-            <i class="fa-solid fa-bell"></i>
+        <div class="bell" @click="toggleDropdown" :title="userId ? 'Thông báo' : 'Vui lòng đăng nhập'">
+            <i class="fa-solid fa-bell" :class="{ 'text-muted': !userId }"></i>
 
             <!-- Badge -->
-            <span v-if="unreadCount > 0" class="badge">{{ unreadCount }}</span>
+            <span v-if="unreadCount > 0" class="badge-noti">{{ unreadCount }}</span>
+
+            <!-- Icon khi chưa đăng nhập -->
+            <span v-if="!userId" class="login-hint">🔒</span>
         </div>
 
         <!-- Popup danh sách -->
@@ -13,19 +16,27 @@
             <div v-if="showList" class="noti-box">
                 <div class="noti-header">
                     <h4>Thông báo</h4>
-                    <button class="mark-all" @click="markAllAsRead">Đánh dấu tất cả đã đọc</button>
+                    <button v-if="userId" class="mark-all" @click="markAllAsRead">Đánh dấu tất cả đã đọc</button>
                 </div>
 
                 <div class="noti-content">
-                    <div v-for="noti in notifications" :key="noti._id" class="noti-item"
-                        :class="{ unread: !noti.isRead }" @click="markAsRead(noti)">
-                        <div class="noti-title">{{ noti.title }}</div>
-                        <div class="noti-msg">{{ noti.message }}</div>
-                        <div class="noti-time">{{ formatTime(noti.createdAt) }}</div>
+                    <!-- Hiển thị thông báo khi đã đăng nhập -->
+                    <div v-if="userId">
+                        <div v-for="noti in notifications" :key="noti._id" class="noti-item"
+                            :class="{ unread: !noti.isRead }" @click="markAsRead(noti)">
+                            <div class="noti-title">{{ noti.title }}</div>
+                            <div class="noti-msg">{{ noti.message }}</div>
+                            <div class="noti-time">{{ formatTime(noti.createdAt) }}</div>
+                        </div>
+
+                        <div v-if="notifications.length === 0" class="no-data">
+                            Không có thông báo
+                        </div>
                     </div>
 
-                    <div v-if="notifications.length === 0" class="no-data">
-                        Không có thông báo
+                    <!-- Hiển thị khi chưa đăng nhập -->
+                    <div v-else class="no-data">
+                        <p>Vui lòng đăng nhập để xem thông báo</p>
                     </div>
                 </div>
             </div>
@@ -34,11 +45,9 @@
 </template>
 
 <script>
-import axios from "../services/api.js"; 
+import axios from "../services/api.js";
 import socket from "../socket.js";
-socket.on("notification", (noti) => {
-    console.log("📢 REALTIME NOTIFICATION:", noti);
-});
+import "../assets/css/notification.css";
 export default {
     name: "NotificationBell",
 
@@ -47,6 +56,7 @@ export default {
             showList: false,
             notifications: [],
             userId: null,
+            role: null,
         };
     },
 
@@ -57,6 +67,43 @@ export default {
     },
 
     methods: {
+        async checkUserLogin() {
+            try {
+                const userStr = localStorage.getItem("user");
+                if (userStr && userStr !== "null" && userStr !== "undefined") {
+                    const user = JSON.parse(userStr);
+                    this.userId = user._id || user.id || user.userId;
+                    this.role = user.role;
+
+                    if (this.userId) {
+                        return true;
+                    }
+                }
+                this.userId = null;
+                this.role = null;
+                return false;
+            } catch (error) {
+                this.userId = null;
+                this.role = null;
+                return false;
+            }
+        },
+
+        async setupNotifications() {
+
+            socket.emit("join-user", this.userId);
+            await this.loadNotifications();
+
+
+            socket.on("notification", (noti) => {
+
+                if ((noti.userId && noti.userId.toString() === this.userId.toString()) ||
+                    (!noti.userId && this.role === 'admin')) {
+                    this.notifications.unshift(noti);
+                }
+            });
+        },
+
         async loadNotifications() {
             if (!this.userId) return;
 
@@ -85,7 +132,7 @@ export default {
 
         async markAllAsRead() {
             for (const n of this.notifications) {
-                if (!n.isRead) this.markAsRead(n);
+                if (!n.isRead) await this.markAsRead(n);
             }
         },
 
@@ -95,119 +142,11 @@ export default {
     },
 
     async mounted() {
-        // Lấy userId từ token hoặc localStorage
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (user) this.userId = user.id;
-
-        await this.loadNotifications();
-
-        // Nhận thông báo realtime
-        socket.on("notification", (noti) => {
-            // Chỉ nhận thông báo đúng user
-            if (!noti.userId || noti.userId === this.userId) {
-                this.notifications.unshift(noti);
-            }
-        });
+        await this.checkUserLogin();
+        if (this.userId) {
+            await this.setupNotifications();
+        }
     },
 };
 </script>
 
-<style scoped>
-.noti-wrapper {
-    position: relative;
-    display: inline-block;
-}
-
-.bell {
-    cursor: pointer;
-    font-size: 24px;
-    position: relative;
-    color: #444;
-}
-
-.bell:hover {
-    color: #000;
-}
-
-.badge {
-    position: absolute;
-    top: -6px;
-    right: -8px;
-    background: red;
-    color: white;
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 50%;
-}
-
-.noti-box {
-    position: absolute;
-    width: 340px;
-    right: 0;
-    top: 36px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.15);
-    z-index: 999;
-    overflow: hidden;
-}
-
-.noti-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    background: #eee;
-}
-
-.noti-content {
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.noti-item {
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-}
-
-.noti-item:hover {
-    background: #f7f7f7;
-}
-
-.unread {
-    background: #e8f0ff;
-    font-weight: 600;
-}
-
-.noti-title {
-    font-size: 14px;
-}
-
-.noti-msg {
-    font-size: 13px;
-    color: #555;
-}
-
-.noti-time {
-    margin-top: 6px;
-    font-size: 11px;
-    color: #888;
-}
-
-.no-data {
-    text-align: center;
-    padding: 20px;
-    color: #888;
-}
-
-/* transition */
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.15s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>

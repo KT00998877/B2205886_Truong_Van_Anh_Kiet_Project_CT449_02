@@ -4,7 +4,7 @@
 
         <!-- Nút thêm -->
         <div class="toolbar">
-            <button class="btn-add" @click="openAddForm">➕ Thêm phiếu mượn</button>
+            <button class="btn-add" @click="openAddForm"> Thêm phiếu mượn</button>
         </div>
 
         <!-- Bảng danh sách -->
@@ -34,7 +34,8 @@
                             'bg-info text-dark': record.TrangThai === 'Đã duyệt - Đang mượn',
                             'bg-success': record.TrangThai === 'Đã trả',
                             'bg-danger': record.TrangThai === 'Từ chối',
-                            'bg-dark text-white': record.TrangThai === 'Mất sách'
+                            'bg-dark text-white': record.TrangThai === 'Mất sách',
+                            'bg-danger text-white': record.TrangThai === 'Quá hạn',
                         }">
                             {{ record.TrangThai }}
                         </span>
@@ -104,8 +105,8 @@
                     <option>Mất sách</option>
                 </select>
                 <div class="form-buttons">
-                    <button @click="saveForm" class="btn-save">💾 Lưu</button>
-                    <button @click="closeForm" class="btn-cancel">❌ Hủy</button>
+                    <button @click="saveForm" class="btn-save"> Lưu</button>
+                    <button @click="closeForm" class="btn-cancel"> Hủy</button>
                 </div>
             </div>
         </div>
@@ -119,11 +120,31 @@
                 <textarea v-model="lyDoTuChoi" rows="3" style="width:100%; padding:8px"></textarea>
 
                 <div class="form-buttons">
-                    <button class="btn-save" @click="submitTuChoi">✔ Xác nhận</button>
-                    <button class="btn-cancel" @click="showLyDoPopup = false">❌ Hủy</button>
+                    <button class="btn-save" @click="submitTuChoi"> Xác nhận</button>
+                    <button class="btn-cancel" @click="showLyDoPopup = false"> Hủy</button>
                 </div>
             </div>
         </div>
+
+        <!-- Popup nhập lý do Mất sách -->
+        <div v-if="showLyDoMatPopup" class="popup-overlay">
+            <div class="popup-form">
+                <h3>Nhập lý do mất sách</h3>
+
+                <label>Lý do:</label>
+                <textarea v-model="lyDoMatSach" rows="3" style="width:100%; padding:8px"></textarea>
+
+                <label>Số tiền phạt (tuỳ chọn):</label>
+                <input type="number" v-model="soTienPhat" placeholder="Nhập số tiền hoặc để trống" />
+
+
+                <div class="form-buttons">
+                    <button class="btn-save" @click="submitMatSach"> Xác nhận</button>
+                    <button class="btn-cancel" @click="showLyDoMatPopup = false"> Hủy</button>
+                </div>
+            </div>
+        </div>
+
 
     </div>
 </template>
@@ -139,6 +160,11 @@ const editing = ref(false);
 const showLyDoPopup = ref(false);
 const lyDoTuChoi = ref("");
 const selectedRecord = ref(null);
+
+const showLyDoMatPopup = ref(false);
+const lyDoMatSach = ref("");
+const soTienPhat = ref("");
+
 const form = ref({
     MaDocGia: "",
     MaSach: "",
@@ -176,13 +202,35 @@ const traSach = async (record) => {
 };
 
 // mất sách
-const matSach = async (record) => {
-    if (!confirm("Xác nhận mất sách?")) return;
+const selectedRecordMat = ref(null);
 
-    await api.put(`/theodoimuonsach/mat/${record._id}`);
-    alert("📕 Đã cập nhật mất sách!");
-    loadRecords();
+const matSach = (record) => {
+    selectedRecordMat.value = record;
+    lyDoMatSach.value = "";
+    showLyDoMatPopup.value = true;
 };
+
+const submitMatSach = async () => {
+    if (!lyDoMatSach.value.trim()) {
+        alert("Vui lòng nhập lý do mất sách!");
+        return;
+    }
+
+    try {
+        await api.put(`/theodoimuonsach/mat/${selectedRecordMat.value._id}`, {
+            Lydo: lyDoMatSach.value,
+            soTienPhat: soTienPhat.value || null
+        });
+
+        alert("📕 Đã đánh dấu mất sách!");
+        showLyDoMatPopup.value = false;
+        loadRecords();
+    } catch (err) {
+        console.error("❌ Lỗi mất sách:", err);
+        alert(err.response?.data?.message || "Không thể đánh dấu mất sách!");
+    }
+};
+
 
 
 // 🟢 Duyệt phiếu mượn
@@ -235,8 +283,9 @@ const openAddForm = () => {
 };
 
 const openEditForm = (record) => {
-    form.value = { ...record,
-        MaSach: record.MaSach?._id || record.MaSach  
+    form.value = {
+        ...record,
+        MaSach: record.MaSach?._id || record.MaSach
     };
     selectedId.value = record._id;
     editing.value = true;
@@ -251,7 +300,7 @@ const saveForm = async () => {
     const payload = { ...form.value };
 
     if (payload.MaSach && typeof payload.MaSach === "object") {
-        payload.MaSach = payload.MaSach._id;   
+        payload.MaSach = payload.MaSach._id;
     }
     try {
         if (editing.value) {

@@ -13,15 +13,15 @@ export const createNotification = async (req, res) => {
       data,
     });
 
-    // Emit realtime đến đúng user
-    io.emit("notification", newNotify);
+    // SỬA DÒNG NÀY - emit đến đúng user room
+    io.to(userId.toString()).emit("notification", newNotify);
 
     res.status(201).json({
       status: "success",
       notification: newNotify,
     });
   } catch (error) {
-    console.log(error);
+    console.log("Error creating notification:", error);
     res.status(500).json({ message: "Lỗi tạo thông báo" });
   }
 };
