@@ -230,7 +230,10 @@ export const duyetMuonSach = async (req, res) => {
 // 🔴 Hủy / từ chối phiếu mượn
 export const huyMuonSach = async (req, res) => {
   try {
-    const record = await TheoDoiMuonSach.findById(req.params.id);
+    const record = await TheoDoiMuonSach.findById(req.params.id).populate(
+      "MaSach"
+    );
+
     if (!record)
       return res.status(404).json({ message: "Không tìm thấy phiếu mượn!" });
 

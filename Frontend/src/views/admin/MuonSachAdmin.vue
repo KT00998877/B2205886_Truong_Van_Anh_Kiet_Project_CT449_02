@@ -41,12 +41,11 @@
                         </span>
                     </td>
                     <td>
-                        <span class="badge bg-danger" v-if="record.TrangThai === 'Từ chối'"
-                            title="Lý do: {{ record.Lydo }}">
-                            Từ chối
-                        </span>
+                        <div class="fs-6" v-if="record.TrangThai === 'Từ chối' || record.TrangThai === 'Quá hạn'">
+                            {{ record.Lydo }}
+                        </div>
+                        <div v-else>-</div>
                     </td>
-
 
                     <td class="text-end">
                         <button class="btn btn-sm btn-primary me-1" @click="openEditForm(record)">Cập nhật</button>
@@ -83,7 +82,7 @@
         <!-- Form thêm/sửa -->
         <div v-if="showForm" class="popup-overlay">
             <div class="popup-form">
-                <h3>{{ editing ? "Sửa phiếu mượn" : "Thêm phiếu mượn" }}</h3>
+                <h3>{{ editing ? "Cập nhật phiếu mượn" : "Thêm phiếu mượn" }}</h3>
 
                 <label>Mã độc giả</label>
                 <input v-model="form.MaDocGia" type="text" />
